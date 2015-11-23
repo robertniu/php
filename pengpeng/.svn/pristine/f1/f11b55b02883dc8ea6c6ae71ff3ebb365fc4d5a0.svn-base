@@ -1,0 +1,49 @@
+< html>
+< body>
+<?php
+
+$mysql = new SaeMysql();
+//$sql = "SELECT * FROM `user` LIMIT 10";
+//$data = $mysql->getData( $sql );
+
+//$text1 =$_POST["checkbox"];
+
+
+//$insert = "insert into ww value('".$text."','".$textall."')";
+
+
+
+//$name = strip_tags( $_REQUEST['pyn'] );
+//$name = strip_tags( $_POST["pyn"] );
+$textall ="";
+$name = $_POST['pyn']; 
+
+foreach ($name  as $k=>$v )
+{
+    if ($k==0) $textall.=$v;
+    else $textall.=",".$v;  //(用,做间隔符)
+}
+
+
+
+ /*     
+    for($i=0;$i< count
+    ($weeks);$i++)   
+    echo $weeks[1]."< br>";  
+*/
+echo "textall=".$textall;
+//$age = intval( $_REQUEST['age'] );
+//$sql = "INSERT  INTO `users` ( `id` , `weiboid` , `weiboname`,`pynames` ) VALUES ( '','','','"  . $mysql->escape( $textall ) . "'  ) ";
+$sql = "INSERT  INTO `users` ( `id` , `weiboid` , `weiboname`,`pynames` ) VALUES ( '','','','$textall '  ) ";
+$mysql->runSql( $sql );
+if( $mysql->errno() != 0 )
+{
+    die( "Error:" . $mysql->errmsg() );
+}
+ 
+$mysql->closeDb();
+
+
+　　?>
+< /body>
+< /html>

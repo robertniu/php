@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="zh-CN">
+<head>
+<title>chenhan-oracle</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>
+
+<br>
+【10】
+select memeber from v$logfile where rownum=1; 返回log文件绝对路径探测系统类型
+show parameter parallel_server;
+select member from v$logfile where rownum=1;
+select instance_name from v$instance;
+
+select username from dba_users;
+select password from dba_users where username='vcyber3';
+
+【9】<br>
+select colname form tablename where rownum<=1;<br>
+一、exp/imp：
+
+　　这也算是最常用最简单的方法了，一般是基于应用的owner级做导出导入。
+
+　　操作方法为：在新库建立好owner和表空间，停老库的应用，在老库做
+  <br>exp user/pwd owner=XXX file=exp_xxx.dmp log=exp_xxx.log buffer=6000000，传dmp文件到新库，在新库做
+  <br>imp user/pwd fromuser=XXX touser=XXX file=exp_xxx.dmp log=imp_xxx.log ignore=y.
+
+　　优缺点：优点是可以跨平台使用;缺点是停机时间长，停机时间为从exp到网络传输到新库，再加上imp的时间。
+
+　　二、存储迁移：
+
+　　这种情况下，数据文件、控制文件、日志文件、spfile都在存储上(一般情况下是裸设备)，我们可以直接把存储挂到新机器上，然后在新机器上启动数据库。
+
+　　操作方法：将老库的pfile(因为里面有指向裸设备的spfile链接)，tnsnames.ora，listener.ora，密码文件传到新库的对应位置。将存储切至新机，或者用文件拷贝或dd的方式复制数据文件，启动数据库。
+
+　　优缺点：优点是该迁移方式非常简单，主要的工作是主机工程师的工作，dba只需配合即可，停机时间为当库、切存储、起库的时间。缺点是要求新老库都是同一平台，是相同的数据库版本。
+
+　　三、利用data guard迁移：
+
+　　用dg我们不仅可以用来做容灾，物理的dg我们还可以作为迁移的方式。
+
+　　操作方法：可见http://www.oracleblog.cn/study-note/dg-created-by-rman/或者http://www.oracleblog.cn/study-note/create-dg-by-rman-one-datafile-by-one-datafile/或者其他相关网文。注意switch over之后，可以将dg拆掉，去掉log_archive_dest_2、FAL_SERVER、FAL_CLIENT、standby_file_management参数。另外还要注意如果用rman做dg，注意手工添加tempfile。
+
+　　优缺点：优点是停机时间短，停机时间为switch over的时间。缺点：主机必须双份、存储必须双份。
+
+　　四、用rman做迁移：
+
+　　rman比较适合于跨文件系统的迁移，如同平台下的不同文件系统。
+
+　　操作方法：
+
+　　1.停第三方的归档备份，如legato或dp
+
+　　2.backup数据库：
+
+
+【8】tablespace<br>
+查表在哪个表空间里<br>
+SELECT tablespace_name FROM USER_TABLES WHERE table_name ='TEST';<br>
+查看表空间的使用情况<br>
+SELECT A.TABLESPACE_NAME,A.BYTES TOTAL,B.BYTES USED, C.BYTES FREE,　　(B.BYTES*100)/A.BYTES "% USED",(C.BYTES*100)/A.BYTES "% FREE"　FROM SYS.SM$TS_AVAIL A,SYS.SM$TS_USED B,SYS.SM$TS_FREE C　WHERE A.TABLESPACE_NAME=B.TABLESPACE_NAME AND A.TABLESPACE_NAME=C.TABLESPACE_NAME;
+<br>查看表空间物理文件的名称及大小 <br>
+select tablespace_name, file_id, file_name,round(bytes/(1024*1024),0) total_space from dba_data_files order by tablespace_name;
+<br>查数据库版本<br>
+Select version FROM Product_component_version Where SUBSTR(PRODUCT,1,6)='Oracle';
+<br>
+
+创建临时表空间
+
+create temporary tablespace test_temp
+tempfile 'E:\oracle\product\10.2.0\oradata\testserver\test_temp01.dbf'
+size 32m
+autoextend on
+next 32m maxsize 2048m
+extent management local;
+
+创建数据表空间
+create tablespace test_data
+logging
+datafile 'E:\oracle\product\10.2.0\oradata\testserver\test_data01.dbf'
+size 32m
+autoextend on
+next 32m maxsize 2048m
+extent management local;
+
+创建用户并指定表空间
+create user username identified by password
+default tablespace test_data
+temporary tablespace test_temp;
+
+给用户授予权限
+
+grant connect,resource to username;
+
+以后以该用户登录，创建的任何数据库对象都属于test_temp 和test_data表空间，这就不用在每创建一个对象给其指定表空间了。 <br>
+
+删除表空间：<br>
+1.首先看一下是不是已经使用了OMF
+   sql>show parameter db_create
+查看参数db_create_file_dest,如果已经设置
+则:drop tablespace tablespacename 就可以直接删除表空间以及相应的数据文件
+2.如果没使用OMF,则：
+drop tablespace tablespacename including contents and datafiles
+
+<br>
+【7】dbca Database Configration Assistant<br>
+一般用途，事务处理，定制数据库，数据仓库<br>
+全局数据库名，SID<br>
+oracle enterprise manager grid control<br>
+用户名，口令<br>
+文件系统，自动存储管理asm，裸设备<br>
+数据库文件位置<br>
+指定快速恢复区<br>
+示例方案-example表空间 130M<br>
+初始化参数：	1内存：典型 sga1536m pga1832m oracle40m 用于oracle的总内存3408
+		2指定可以同时连接此数据库的操作系统用户进程最大数量 150
+                3字符集 默认zhs16gbk
+                4连接模式：专用服务器模式-当用户少请求长；共享服务器模式-当用户多
+数据库存储：控制文件*.ctl ；数据文件*.dbf；重做日志组
+创建选项：创建数据库，另存为数据库模板，生成数据库创建脚步
+
+重启isqlplus port 5560：isqlplusctl stop start
+
+
+
+【6】值班查询
+sqlplus zhiban/itownzhiban@usermng
+select * from translogs where transdate='070110'; 
+
+<br>
+test:~ # tcpdump -i eth1 host 10.98.100.13 and port 1521
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), capture size 96 bytes
+05:10:36.190025 IP 10.98.155.117.dpcp > 10.98.100.13.ncube-lm: P 1012097312:1012097517(205) ack 787988667 win 64756
+05:10:36.199860 IP 10.98.155.117.dpcp > 10.98.100.13.ncube-lm: P 205:346(141) ack 368 win 64389
+05:10:36.401061 IP 10.98.155.117.dpcp > 10.98.100.13.ncube-lm: . ack 781 win 65535
+<br>
+3 packets captured
+52 packets received by filter
+0 packets dropped by kernel
+
+<br>
+【5】限制可以连接的ip
+在oracle92/network/admin/sqlnet.ora中增加如下部分<br>
+-----------------------------
+#### 来自 protocol.ora 的属性 ####<br>
+
+tcp.validnode_checking=yes<br>
+
+#允许访问的IP<br>
+tcp.invited_nodes=(ip1,ip2……)
+
+#禁止访问的IP<br>
+tcp.excluded_nodes=(ip1,ip2……)
+
+之后重新启动监听器即可<br>
+lsnrctl reload
+<br>
+【4】新增用户和授权：<br>
+14、增加数据库用户：(test11/test)
+create user test11 identified by test default tablespace users Temporary TABLESPACE Temp;<br>
+15、用户授权:
+grant connect,resource,dba to test11;
+grant sysdba to test11;
+commit;<br>
+16、更改数据库用户的密码：(将sys与system的密码改为test.)
+alter user sys indentified by test;
+alter user system indentified by test;
+
+<br>
+【3】、查看当前所有数据库<br>
+sqlplus "/as sysdba"<br>
+select NAME from v$database;<br>
+查看登陆用户：<br>
+select user from dual; 或 Show user;<br>
+查看有dba权限的用户：<br>
+select * from V_$PWFILE_USERS;<br>
+查看所有的数据库实例：<br>
+select * from v$instance；<br>
+查看当前库的所有数据表：<br>
+SQL> select TABLE_NAME from all_tables;<br>
+select * from all_tables;<br>
+SQL> select table_name from all_tables where table_name like ‘u’;<br>
+查看表结构：desc all_tables;<br>
+
+【2】、添加TNSNAME<br>
+oracle92\network\admin\tnsnames.ora<br>
+sqlplus sys/pwd@//ipaddress/orcl as sysdba
+
+
+
+
+
+</html>

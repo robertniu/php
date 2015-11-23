@@ -1,0 +1,1245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="zh-CN">
+<head>
+<title>chenhan-freebsd</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>
+
+
+
+主要针对FreeBSD4.8
+
+【85】apache的目录访问控制
+[root@vm-linux-1 net]# vi .htaccess
+AuthType Basic
+AuthName "Restricted Files"
+AuthUserFile /usr/web/mrtg.passwd
+Require valid-user
+
+[root@vm-linux-1 net]# htpasswd -c -b /usr/web/mrtg.passwd test2 123456
+
+chmod 644 /usr/web/mrtg.passwd
+
+[root@vm-linux-1 net]# vi /etc/httpd/conf/httpd.conf
+<Directory />
+    Options FollowSymLinks
+#   AllowOverride None
+    AllowOverride All
+</Directory>
+
+service httpd restart
+
+
+
+【84】
+不让普通用户自己改密码
+[root@xin_fc etc]# chmod 511 /usr/bin/passwd
+又想让普通用户自己改密码
+[root@xin_fc etc]# chmod 4511 /usr/bin/passwd 
+
+【83】
+使用md5sum文件
+md5sum isofile > hashfile, 将 md5sum 档案与 hashfile 档案内容比对, 验证杂凑值
+是否一致 md5sum –c hashfile
+
+
+
+【82】
+去掉多余的回车符
+sed 's/^M//' test.sh > back.sh， 注意^M是敲ctrl_v ctrl-m得到的
+或者 dos2unix filename
+
+【81】
+删除名字带不可见字符的文件
+列出文件名并转储到文件：ls -l  >aaa
+然后编辑文件的内容加入rm命令使其内容成为删除上述文件的格式：
+vi aaa
+[rm -r *******
+]
+把文件加上执行权限 chmod +x aaa
+执行 $aaa
+
+【80】
+使Linux系统对ping不反应
+要使Linux对ping没反应，也就是使Linux系统忽略I CMP包。用如下命令可以达到此目的：
+# echo 1 > /proc/sys/net/ipv4/icmp-echo-ignore-all
+若想恢复，可用如下命令：
+# echo 0 > /proc/sys/net/ipv4/icmp-echo-ignore-all
+
+【79】
+ssh上来能不能不自动断线
+修改自己HOME目录下的.bash_profile文件，加上
+export TMOUT=1000000  (以秒为单位)
+然后运行source .bash_profile
+
+【78】
+防止某个关键文件被修改
+在Linux下，有些配置文件是不允许任何人（包括root）修改的。为了防止被误删除或修改，可以设定该文件的“不可修改位(immutable) ”。命令如下：
+# chattr +i /etc/fstab
+如果需要修改文件则采用下面的命令：
+# chattr -i /etc/fstab
+
+【77】
+ls -lF | grep ^d  只列出目录
+
+查找权限位为S的文件
+find . -type f \( -perm -04000 -o -perm -02000 \) -exec ls -lg {} \;
+
+grep不显示本身进程
+#ps -aux|grep httpd|grep -v grep
+
+查找执行的命令的位置
+which lsof
+
+
+【76】查询IP地址是否在cbl黑名单中
+dig 203.233.213.239.cbl.anti-spam.org.cn
+
+
+【75】pkg_add
+FreeBSD上bash的安装方法有二：
+CODE:[Copy to clipboard]1、pkg_add -r bash
+2、cd /usr/ports/shell/bash2 && make install clean
+
+
+
+【74】加密
+openssl enc -e -aes256 -a -in xxxx.txt -out xxxx.cip
+
+
+【73】curl
+./configure --prefix=/usr/local/curl
+make
+make install
+cd /usr/local/curl/bin
+./curl -v -i -D header.txt http://www.faxingren.com/main.php
+
+
+【72】cygwin下启动sshd
+cygrunsrv  --start  sshd
+
+【71】所有关于gcc的stuff
+ gcc main.c -o main.out -lm /usr/lib/libpcap.a
+ gcc -O -s -DGAPING_SECURITY_HOLE -DTELNET -DFREEBSD -static -o nc netcat.c  编译带-e参数的nc
+
+
+【70】两个网卡接在同一个交换机上（vlan的问题？？）（会造成网卡down掉？？）
+
+Mar  1 11:16:29 GateWay /kernel: arp: 192.168.108.83 is on fxp0 but got reply from 00:10:b5:ee:c8:0f on vr0
+Mar  1 11:16:32 GateWay /kernel: arp: 219.237.209.145 is on vr0 but got reply from 00:06:2a:58:28:20 on fxp0
+
+sysctl net.link.ether.inet.log_arp_wrong_iface=0
+
+sysctl net.link.ether.inet.log_arp_movements=0
+
+
+【69】
+lynx
+某些汉字显示为乱码：
+进入lynx后，按o键，进入option菜单，修改Display character set 为Chinese，保存Accept Changes，Save options to disk: [ ]正常。
+
+
+【68】
+暂时关闭ipfilter：
+#ipf -D 
+
+每次修改/etc/ipf.rules或/etc/ipnat.rules之后，需要让他们生效。重新加载规则将断开所有已经存在的连接。 
+# /sbin/ipf -Fa -f /etc/ipf.conf
+# /sbin/ipnat -CF -f /etc/ipnat.conf
+
+
+
+
+【67】snmp
+/usr/local/snmp/bin/snmpconf -g basic_setup
+
+
+【66】
+cal 9 1752 
+少了10天的那个月
+
+【65】慎用该内核模块，默认规则加载后ssh连接会被强制断开。
+kldload /modules/ipfw.ko
+
+
+【64】.安装tripwire
+由于license的问题， tripwire-2.3.1-2.tar.gz不是任意可以下载的，你需要先得到这个文件，可以在网上搜一下试试，或到tripwire网站上试试，下载后以root用户将该文件放在/usr/ports/distfiles/路径下，然后 
+cd /usr/ports/security/tripwire 
+make install clean
+
+
+ tripwire --init
+ tripwire --check
+
+63
+file 判断文件类型
+
+
+【62】.挂接u盘和软盘以及初始化
+start usb disk: 
+mount_msdosfs -L zh_CN.eucCN -D CP936 /dev/da0 /mnt/u
+
+mount_msdos /dev/da0s1 /usbdisk
+
+mount_ntfs
+内核中加入 options ntfs  
+
+-bash-3.00# mount_msdos /dev/da0s1 /usbdisk     //挂接fat32的u盘成功
+
+mount_msdos /dev/fd0 /floppy  //挂软盘
+umount /dev/fd0
+
+
+fdformat /dev/fd0.1440
+disklabel -B -r -w /dev/fd0 fd1440
+newfs /dev/fd0
+mount /dev/fd0 /floppy
+
+dd if=flp-bsd.bin of=/dev/fd0
+
+newfs -b 16384 -f 2048 /dev/da0s1e (/stand/sysinstall/label中抓屏得来)
+
+【61】.如何让非root用户可以修改系统时间
+1、用 sudo 
+2、chmod a+s /bin/date
+
+
+【60】.不重启使rc.conf的更改生效
+sh /etc/rc
+
+【59】.perl及其模块安装
+tar zxvf perl-5.8.6.tar.gz
+cd perl-5.8.6
+rm -f config.sh Policy.sh
+sh Configure -de
+make
+make test
+make install
+
+tar zxvf URI-1.35.tar.gz
+/usr/bin/perl2 Makefile.PL
+make
+make test
+make install
+
+
+#!/bin/sh
+DATA0="%e5%8f%b0%e6%b9%be%e6%89%93%e8%bf%87%e6%9d%a5%e5%95%a6%ef%bc%81"
+DATA=`perl2 -e "use Encode; use URI::Escape; print encode('euc-cn',decode('utf-8',uri_unescape('$DATA0')));"`
+echo "$DATA"
+
+
+
+【58】.
+拷贝远程主机上的文件到本地
+scp -P 2266 stanley@192.168.108.2:/home/stanley/ipnat.l.txt /home/shellwork
+
+
+【57】.启用ipnat
+
+GateWay# more /etc/rc.local
+/sbin/ipnat -f /etc/ipnat.conf
+
+more /etc/rc.conf
+gateway_enable="YES"
+named_enable="YES"
+natd_enable="YES"
+natd_interface="vr0"
+
+
+GateWay# more /etc/ipnat.conf
+map vr0 192.168.108.0/24 -> 211.154.172.126/32 portmap tcp/udp 10000:65000
+map vr0 192.168.108.0/24 -> 211.154.172.126/32
+
+#rdr vr0 211.154.172.114/32 port 80 -> 192.168.108.4 port 80
+
+
+
+【56】.内核加载ipfilter后，模块加载ipfw
+-bash-3.00# more /etc/rc.d/ipfw.sh
+/sbin/kldload /modules/ipfw.ko
+/sbin/kldload /modules/dummynet.ko
+/sbin/ipfw -f flush  清空规则，慎用！！！
+/sbin/ipfw -f pipe flush
+/sbin/ipfw add 00001 allow ip from any to any
+
+刷新ipfw规则
+sh /etc/rc.firewall
+
+
+【55】.压缩目录
+tar czf myarch.tar mydir 
+tar czf bbspage.tar --exclude=attachment --exclude=image .  排除一个目录
+如果是排除多个目录，可以将需要排除的目录每个一行写入文件中，
+如 tar_exclude：tar -cz --exclude-from tar_exclude -vf from_dir.tar.gz from_dir
+
+【54】.fstab文件错误的修正
+1、进入安全模式boot -s 
+2、逐个按照cat /etc/fstab 后mount正确设备 mount -t ufs /dev/da1s1g /usr 
+3、login root 进入后修正fstab文件 vi /etc/fstab
+#mount新硬盘的顺序：
+/stand/sysinstall->configure->fdisk->
+                              ->label->creat
+                                     ->write
+  mount
+  vi /etc/fstab
+
+
+【53】MYSQL部分：导入、导出Mqsql数据库等……
+查看数据库的每个表的属性（表类型、编码等）
+ SHOW TABLE STATUS FROM phpwind53;
+显示表结构：
+desc 表名
+查看mysql的编码：
+SHOW VARIABLES LIKE 'character%';
+show variables like '%server%';
+
+show processlist;
+SHOW STATUS LIKE 'uptime';
+SHOW STATUS LIKE 'Open%tables';
+SHOW STATUS LIKE 'key_read%';
+
+修改表编码
+
+ALTER TABLE `pw_online` CONVERT TO CHARACTER SET `latin1`;
+
+列出可用的字符集
+SHOW CHARACTER SET;
+
+1句话导出数据库
+mysqldump vbulletin > cnvbb.sql
+只导出结构 mysqldump -uroot -p123 -d hitfm > hitfm.sql
+
+
+2句话导入数据库
+mysqladmin create vbulletin   
+mysql vbulletin < cnvbb.sql
+
+./mysqladmin -uroot -p56PB8nCT@j create movie2
+./mysql -uroot -p56PB8nCT@j movie2 < movie-060927.sql
+delete from tab_channel_info WHERE fld_channel_name="aaa";
+
+
+GRANT ALL PRIVILEGES ON *.* TO monty@localhost IDENTIFIED BY 'something' WITH GRANT OPTION;
+GRANT语句安装1个新用户：monty 可以从任何地方连接服务器的一个完全的超级用户，但是必须使用一个口令('something'做这个。
+
+ SELECT * FROM ibf_members WHERE name ='Administrator' ;
+
+ UPDATE ibf_members SET member_login_key='0dacc99ca638ee2a6cf9597fafe3fbdf' WHERE id='1';
+
+查看表类型（存储引擎）：
+SHOW TABLE STATUS FROM hitfm;
+
+更改表类型：
+mysql> ALTER TABLE ibf_sessions ENGINE = HEAP;  原类型是MyISAM
+
+mysqladmin -uroot -p variables 
+输入root数据库账号的密码后可看到 
+| max_connections | 1000 | 
+
+查看版本号
+mysql> \s
+msyql/bin/mysql -u root -p -e "select version()"
+/bin mysqladmin  version
+
+phpmyadmin报1251错误的解决办法：
+ update mysql.user set password=OLD_PASSWORD('56PB8nCT@j') where user='root';
+ flush privileges;
+
+mysql日志部分：
+1.首先确认你日志是否启用了
+mysql>show variables like 'log_bin';
+2.如果启用了，即ON
+那日志文件就在mysql的安装目录的data目录下
+3.怎样知道当前的日志
+mysql> show master status;                                                                                                                                                4.看二进制日志文件用mysqlbinlog
+shell>mysqlbinlog mail-bin.000001
+或者shell>mysqlbinlog mail-bin.000001 | tail 
+
+
+如何开启mysql日志：
+如果show variables like 'log_bin';显示为OFF
+vi vi /usr/bin/mysqld_safe
+查找-O max_connections=
+在后面加入  -O log_bin=ON -O log_error=/var/mysqlerr
+重新启动mysql: service mysql restart
+
+MySQL常用配置
+开启MySQL日志记录
+#二进制日志 
+log-bin=
+#查询日志
+log=
+#错误日志
+log-error=
+#更新日志
+log-update=
+#慢查询日志:
+#log-slow-queries
+
+【15】Mysql:
+
+./mysqladmin -uroot -p123 password 123456
+./mysql -uroot -pabcd123
+./mysql -h110.110.110.110 -uroot -pabcd123
+show databases; 
+use mysql;
+show tables;
+select * from 表名;
+drop database 库名;  
+drop table 表名；  
+
+1、首先 kill 运行的mysql, killall -TERM mysqld 
+2、启动mysql，并且跳过权限检查，/wheremysqlinstall/bin/safe_mysqld --skip-grant-tables & 
+3、登录mysql 
+>use mysql 
+>update user set password=password("your_pass") where user="root"; 
+>flush privileges; 
+4、restart mysql
+
+grant all on *.* to root@"192.168.108.99" Identified by "123456";
+#mysql -u root -p 
+>grant select,insert,update,delete on *.* to root@"202.88。10.253" Identified by "dbmysql"; 
+
+----允许地址202。88。10。253上用root用户，密码dbmysql来连接mysql的所有数据库，付给select,insert,update,delete权限。 
+
+
+grant all on *.* to root@"202.88.10.253" Identified by "dbmysql" 
+
+允许地址202。88。10。253上用root用户，密码dbmysql来连接mysql的所有数据库，付给所有权限。
+
+
+
+MySQL最基本操作 
+
+0,停止mysql
+mysqladmin -u root -p shutdown
+1,连接到MySQL数据库
+mysql -h hostname -u username -ppassword [databasename]
+2，离开MySQL
+命令：quit 或者 exit 或者 Ctrl+D
+3,授权一个用户使用数据库
+GRANT ALL ON Database_name.* to user_name@localhost IDENTIFIED BY 'user_password';
+4,授权给用户
+GRANT ALL ON student.* to username@localhost identified by 'password';
+5,修改管理员密码
+mysqladmin -u root -p password modifypassword
+6,创建数据库
+CREATE DATABASE database_name
+7,使用数据库
+USE database_name
+8，删除数据库
+DROP DATABASE database_name
+9,创建表
+CREATE TABLE tbl_name(field1,field2,...,fieldN)
+10,删除表格
+DROP TABLE tbl_name
+11,更改表名
+ALTER TABLE tbl_name RENAME tbl_newname
+12,更改字段名
+ALTER TABLE tbl_name CHANGE old_colname new_colname
+13,更改字段类型
+ALTER TABLE tbl_name MODIFY col_name DATATYPE 
+14,增加字段
+ALTER TABLE tbl_name ADD col_name DATATYPE
+15,删除字段
+ALTER TABLE tbl_name DROP col_name
+16,索引的创建
+CREATE INDEX index_name ON tbl_name(field_name)
+17,删除索引
+DROP INDEX index_name ON tbl_name
+
+
+
+忘记密码：
+/etc/init.d/mysqld stop
+mysqld_safe --skip-grant-tables &
+mysql> use mysql
+mysql> update user set password=password("56PB8nCT@j") where user="root";
+mysql> flush privileges;
+
+
+
+
+【52】.查看硬件信息
+more /var/run/dmesg.boot
+
+【51】.安装nmap、nessus、samba、snort、nc、bash、pcre、libpcap、m4、bison、vim
+tar -zxvf samba-3.0.14a.tar.gz
+cd samba-3.0.14a
+./configure --prefix=/usr/local/samba
+make
+make install
+vi /usr/local/samba/lib/smb.conf
+然后我们使用smbpasswd -a username的命令为6个帐户分别添加到samba用户中
+
+[global] 
+workgroup = apecn 
+netbios name = samba-76 
+hosts allow = 192.168.18. 192.168.108. 127.
+guest account = root
+security = share 【user】
+
+[software]
+path=/software
+public=yes
+writeable=yes
+valid users = @stanley【group】，username【user】
+
+cd /usr/local/samba/sbin
+./nmbd
+./smbd
+
+『nc』
+make freebsd
+
+『nmap』
+tar -zxvf nmap-3.45.tgz
+cd nmap-3.45
+./configure --prefix=/usr/local/nmap
+make
+make install
+
+『nessus』
+tar -zxvf m4-1.4.tar.gz
+./configure
+make
+make install
+rm /usr/bin/m4
+
+tar -zxvf bison-2.0.tar.gz
+./configure
+make 
+make install
+
+./nessus-installe.sh
+/usr/local/nessus/sbin/nessus-adduser
+/usr/local/nessus/sbin/nessus-mkcert
+/usr/local/nessus/sbin/nessusd -D
+
+
+
+『snort』
+tar -zxvf libpcap-0.9.1-096.tar.gz
+./configure
+make 
+make install
+
+tar -zxvf pcre-4.5.tar.gz
+./configure
+make 
+make install
+
+tar -zxvf snort-2.3.3.tar.gz
+cd snort-2.3.3
+./configure --prefix=/usr/local/snort
+make
+make install
+
+
+【50】.wc -c -l -w filename
+(cat <c.1.9.c | wc -l)
+
+
+【49】.touch -t 06100930 myfile2
+
+
+【48】.fuser(fstat) diff logname
+
+
+【47】.vi的使用(ed逐行编辑)
+Ctrl+G  显示当前行数
+
+
+【46】.watch命令的使用
+
+
+
+【45】.  more /etc/rc.conf
+defaultrouter="192.168.108.2"
+hostname="SunBSD"
+ifconfig_rl0="inet 192.168.108.80 netmask 255.255.255.0"
+ifconfig_rl0_alias0="inet 211.154.172.123 netmask 255.255.255.240"
+kern_securelevel_enable="NO"
+linux_enable="YES"
+#nfs_reserved_port_only="YES"
+sendmail_enable="NONE"
+sshd_enable="YES"
+usbd_enable="YES"
+syslogd_enable="YES"
+syslogd_flags="-ss"
+
+##########IP-firewall#################
+firewall_enable="YES"
+firewall_script="/etc/rc.firewall"
+firewall_type="/etc/ipfw.conf"
+firewall_quiet="YES"
+firewall_logging_enable="YES"
+
+
+
+44.ipfilter启用
+内核：
+#options		IPFIREWALL
+#options		IPDIVERT
+options		IPFILTER
+options		IPFILTER_LOG
+
+rc.conf:
+firewall_enable="NO"
+
+reboot
+
+ipnat -l
+apecn# ipnat
+/dev/ipnat: open: Device not configured //如果没有配置则会出现该提示
+
+
+
+43.ipfw (211.154.172.116)
+apecn# ipfw list
+00001 deny log logamount 100 ip from any to any ipopt rr
+00002 deny log logamount 100 ip from any to any ipopt ts
+00003 deny log logamount 100 ip from any to any ipopt ssrr
+00004 deny log logamount 100 ip from any to any ipopt lsrr
+00005 deny tcp from any to any in tcpflags fin,syn
+10000 allow tcp from 192.168.108.99 to 192.168.108.102 in
+10009 allow tcp from any to any 80,25,110 in
+19997 check-state
+19998 allow tcp from any to any keep-state out setup
+19999 allow tcp from any to any out
+20001 allow udp from any 53 to me in recv fxp0
+20002 allow udp from any to 211.154.172.116 53 in recv fxp0
+29999 allow udp from any to any out
+30000 allow icmp from any to any icmptype 3,4
+30001 allow icmp from any to any out icmptype 8
+30002 allow icmp from any to any in icmptype 0,11
+65535 deny ip from any to any
+
+
+
+42.uptime查看系统运行时间
+show how long system has been running
+
+38.竖排显示ls结果
+ls -l | awk '{print $9}'
+ls -ltr 按时间倒序排列
+
+39.putty自动连接
+putty -load bsd-76
+
+40.修改home directory等
+chpass root
+passwd root更改root密码
+
+41.sshd欢迎信息
+vi /etc/ssh/sshd_config
+显示用户的欢迎信息PrintMotd yes/no
+kill /usr/sbin/sshd
+/usr/sbin/sshd
+修改欢迎信息
+vi /etc/motd
+
+0.root直接登陆ssh
+/etc/ssh/sshd_config
+PermitRootLogin yes
+rm -rf 
+不管目錄或file都可以刪除... 只是身份如果是root..要小心... 
+system("rm -rf $directory 1>/tmp/log 2>&1 ");
+rc.conf:
+defaultrouter="192.168.108.2"
+hostname="BSD76"
+ifconfig_vr0="inet 192.168.108.76 netmask 255.255.255.0"
+ps -ax |grep sendmail
+
+用下面的命令可以查看哪些服务正在试图监听连接你的系统： 
+sockstat -4 
+mv snmpd.sh snmpd.sh.sample killall snmpd 
+ls -l | grep "^d"
+df -k | awk '{print $1}' | grep -v "Filesystem"
+grep "Section 3" /usr/local/apache/conf/httpd.conf
+find /usr/bin -name "*stat"
+wc echo1.sh  //查看文件行数
+ls /usr/bin | grep '^[^a-z]'  //取开头不是a-z的文件和目录
+
+
+1、安装mm-1.3.0 
+server# tar zxvf mm-1.3.0.tar.gz 
+server# cd mm-1.3.0 
+server# ./configure --disable-shared 
+server# make 
+server# make test 
+server# make install 
+
+2、配置mod_ssl-2.8.15-1.3.28 
+
+tar zxvf mod_ssl-2.8.15-1.3.28.tar.gz
+tar zxvf apache_1.3.28.tar.gz
+cd mod_ssl-2.8.15-1.3.28 
+./configure --with-apache=../apache_1.3.28 --with-mm=../mm-1.3.0 --prefix=/usr/local/apache--enable-shared=ssl 
+server# cd .. 
+
+3、配置安装mod_perl-1.27 
+tar zxvf mod_perl-1.0-current.tar.gz
+server# cd mod_perl-1.29 
+server# perl Makefile.PL EVERYTHING=1 APACHE_SRC=../apache_1.3.28/src USE_APACI=1 PREP_HTTPD=1 DO_HTTPD=1 (Freebsd 4.7下有两处错误提示，忽略) 
+server# make 
+server# make install 
+server# cd .. 
+
+
+4 安装mysql
+
+#pw groupadd mysql
+#pw adduser mysql
+#tar zxvf mysql-3.23.58.tar.gz
+#cd mysql-3.23.58
+#./configure --prefix=/usr/local/mysql
+#make
+#make install
+#scripts/mysql_install_db --force
+#chown -R root /usr/local/mysql
+#chown -R mysql /usr/local/mysql/var
+#chgrp -R mysql /usr/local/mysql
+#cp support-files/my-medium.cnf /etc/my.cnf        (overwrite?-->yes)
+#/usr/local/mysql/bin/safe_mysqld --user=mysql &
+awk '{print $1,$6}' pingall.sh | tee wow
+
+
+正常编译过程中报错：  
+configure: error: Your compiler cannot convert a longlong value to a float!  
+If you are using gcc 2.8.# you should upgrade to egcs 1.0.3 or newer and try  
+
+但查gcc版本却是3.2.2  
+
+修改 /home/..../mysql-3.23.57/configure  
+
+找到下面這一段  
+  cat >conftest.$ac_ext <<_ACEOF  
+#line 11034 "configure"  
+#include "confdefs.h"  
+#include <stdio.h>  
+typedef long long longlong;  
+main()  
+{  
+  longlong ll=1;  
+  float f;  
+  FILE *file=fopen("conftestval", "w");  
+  f = (float) ll;  
+  fprintf(file,"%g\n",f);  
+  close(file);  
+  exit (0);  
+}  
+
+把 close 改成 fclose 即可
+
+
+
+
+
+5 安装apache和php
+cd apache_1.3.28 
+./configure --prefix=/usr/local/apache
+cd ..
+tar zxvf php-4.3.3.tar.gz
+cd php-4.3.3 
+./configure --with-mysql --with-apache=../apache_1.3.28 --enable-track-vars 
+[./configure --with-mysql --with-apache=../apache_1.3.28 --enable-track-vars --with-iconv=/usr/local/libiconv-1.11]
+make 
+make install 
+cd ../apache_1.3.28 
+./configure --prefix=/usr/local/apache --activate-module=src/modules/php4/libphp4.a 
+make 
+make install 
+cd ../php-4.3.3
+cp php.ini-dist /usr/local/lib/php.ini 
+
+在 httpd.conf 或 srm.conf 加入
+cd /usr/local/apache/conf
+AddType application/x-httpd-php .php
+AddType application/x-httpd-php-source .phps
+测试php：
+cp phptest.php /usr/local/apache/htdocs
+
+
+5-2另一种方法
+cd apache_1.3.28
+./configure --prefix=/usr/local/apache --enable-module=so --enable-shared=max 
+make
+make install
+
+cd php-4.3.3
+./configure --prefix=/usr/local/php --with-mysql=/usr/local/mysql --with-apxs=/usr/local/apache/bin/apxs --with-iconv=/usr/local/libiconv-1.11 --enable-track-vars 
+make
+make install
+cp php.ini-dist /usr/local/php/lib/php.ini 
+
+5-1 安装apache2.2.3和php5.1.6
+备份apache数据
+cd /usr/local/
+rm -rf apache
+tar zxvf httpd-2.2.3.tar.gz
+cd httpd-2.2.3
+./configure --prefix=/usr/local/apache --enable-module=so --enable-shared=max 
+make
+make install
+
+tar zxvf libiconv-1.11.tar.gz
+./configure --prefix=/usr/local/libiconv-1.11
+make
+make install
+
+tar zxvf gd-2.0.33.tar.gz
+./configure --prefix=/usr/local/gd-2.0.33
+make 
+make install
+
+tar zxvf libxml2-2.6.19.tar.gz
+./configure --prefix=/usr/local/libxml2
+make
+make install
+
+tar jxvf php-5.1.6.tar.bz2
+cd php-5.1.6
+./configure --prefix=/usr/local/php --with-mysql=/usr/local/mysql --with-apxs2=/usr/local/apache/bin/apxs --with-iconv=/usr/local/libiconv-1.11 --with-gd=/usr/local/gd-2.0.33 --with-libxml-dir=/usr/local/libxml2 --enable-maintainer-zts --enable-memory-limit --enable-zend-multibyte
+make
+make test
+make install
+cp php.ini-dist /usr/local/lib/php.ini
+
+安装未成功，运行apache出错：
+-bash-3.00# /usr/local/apache/bin/apachectl restart
+httpd: Syntax error on line 53 of /usr/local/apache/conf/httpd.conf: Cannot load /usr/local/apache/modules/
+ibphp5.so into server: /usr/local/apache/modules/libphp5.so: Undefined symbol "pthread_mutex_lock"
+
+
+
+6 安装proftpd(unsuccessful)
+ tar vxzf proftpd-1.2.8p.tar.gz
+ tar vxzf proftpd-mod-quotatab-1.2.7.tar.gz
+ cd mod_quotatab
+ cp * ../proftpd-1.2.8/modules
+cd proftpd-1.2.8/contrib  
+vi mod_sql_mysql.c
+找到#include <mysql/mysql.h> 把他该为你实际路径，这里是：
+/usr/local/mysql/include/mysql/mysql.h
+
+cd proftpd-1.2.8
+./configure --prefix=/usr/local/proftpd --with-modules=mod_sql:mod_sql_mysql:mod_quotatab:mod_quotatab_sql --with-includes=/usr/local/mylql/include/mysql --with-libraries=/usr/local/mysql/lib/mysql
+make
+make install
+
+
+
+7安装bind
+ tar vxzf bind-9.2.3.tar.gz
+./configure --prefix=/usr/local/bind 
+make
+make install
+
+/usr/local/bind/sbin/rndc-confgen > rndc.conf
+把rndc.conf中：
+# Use with the following in named.conf, adjusting the allow list as needed: 
+后面的部分加到/var/named/etc/named.conf中并去掉注释
+
+mkdir /usr/local/bind/var
+ln -s /var/run /usr/local/bind/var/run
+ln -s 源目录 目标目录
+
+./named -gc /etc/namedb/named.conf &
+
+8安装邮件系统
+Free# tar vxzf Qmail_setup-v1.5.3.tar.gz
+Free# cp sqwebmail-3.5.0-cn.tar.gz Qmail_setup
+Free# cd Qmail_setup
+Free# vi setup 
+Free# chmod 700 setup 
+Free# ./setup
+按系统情况修改如下内容：（这里是我的配置） 
+
+# 操作系统类型为FreeBSD 
+_OS="FreeBSD" 
+
+# 默认语言为中文 
+_LANG="CN" 
+
+# 不安装apache 
+_INSTALLAPACHE="NO" 
+
+# 添加qmail用户 
+_ADDQMAILUSERS="YES" 
+
+# 域名 
+_DOMAIN=mail01.3322.org 
+
+# 邮箱管理员密码 
+_MAILPASSWD=1234 
+
+# CGI路径 
+_CGIBIN=/usr/local/www/cgi-bin 
+
+# Html路径 
+_HTMLPATH=/usr/local/www/data 
+
+
+###########--------Advanced set--------################# 
+# 设置邮箱容量50M 
+_MAILSIZE=50000000 
+# enable virutal domain lookup via reverse ip address lookup for virtual domains. "y" and "n" 
+_USERCRUISE=n 
+# apache 安装路径 
+_APACHEPATH=/usr/local 
+# 不使用系统用户验证 
+_SYSTEMPASS=n 
+# 安装 vpopmail 
+_VPOPMAIL="YES" 
+# 安装 ezmlm 
+_EZMLMIN="YES" 
+# ezmlm coding 
+_EZMLM=ch_GB 
+# 安装 autorespond 
+_AUTORESPOND="YES" 
+# 安装 QmailAdmin 
+_QMAILADMIN="YES" 
+
+##########--------SqWebMail set--------############# 
+# 安装 webmail 
+_WEBMAIL="YES" 
+# webmail coding set.have "iso","gb2312","big5" and more. 
+_MIMESET=gb2312 
+# webmail use SSL,"YES" or "NO" 
+_WEBHTTPS="NO" 
+
+##########--------SQL set---------################ 
+# 使用数据库 
+_SQL=y 
+# mysql 主机 
+_SQLHOST=localhost 
+# mysql 用户 
+_SQLUSER=root 
+# mysql 密码 
+_SQLPASS=123456 
+# include path 
+_INCDIR=/usr/local/include/mysql 
+# lib file path 
+_LIBDIR=/usr/local/lib/mysql 
+
+
+然后在安装脚本里找到下面几句 
+tar xzf sqwebmail-3.3.7.20020910.tar.gz 
+cd sqwebmail-3.3.7.20020910 
+if [ "$_LANG" = "CN" ]; then 
+cp /tmp/iceblood/Qmail_setup/iceblood/sqwebmailcn/*.html sqwebmail/html/en-us 
+fi 
+
+将其改为 
+tar xzf sqwebmail-3.5.0-cn.tar.gz 
+cd sqwebmail-3.5.0 
+#if [ "$_LANG" = "CN" ]; then 
+#cp /tmp/iceblood/Qmail_setup/iceblood/sqwebmailcn/*.html sqwebmail/html/en-us 
+#fi 
+
+改好后保存。这样安装包就可以自动安装新的sqwebmail程序。 
+
+
+9安装论坛
+# mysqladmin -u root password '123456' 
+# cd /usr/local/apache/htdocs
+# mkdir backup-old
+# mv * backup-old
+# cd /home/fafnir/software/vbb2.3.0final
+# cp -r * /usr/local/apache/htdocs
+# vi /usr/local/apache/htdocs/admin/config.php
+http://192.168.0.1/admin/install.php 
+
+
+10要重启 inetd ：
+killall -HUP inetd
+
+
+11配置IPFW
+cd /stand
+./sysinstall (con...distr......)
+cd /sys/i386/conf  
+cp GENERIC ./GENERIC_IPFW 
+--------------------------------- 
+vi GENERIC_IPFW 添加以下内容 
+
+options IPFIREWALL 
+options IPDIVERT 
+options IPFIREWALL_VERBOSE 
+options IPFIREWALL_VERBOSE_LIMIT=100 
+options IPSTEALTH 
+options ACCEPT_FILTER_DATA 
+options ACCEPT_FILTER_HTTP 
+options ICMP_BANDLIM 
+options DUMMYNET 
+--------------------------------- 
+config ./GENERIC_IPFW 
+cd ../../compile/GENERIC_IPFW 
+make depend all install (只编译不安装：make depend && make kernel)
+--------------------------------- 
+vi /etc/rc.conf 添加以下内容 
+
+##########IP-firewall#################   
+firewall_enable="YES" 
+firewall_script="/etc/rc.firewall" 
+firewall_type="/etc/ipfw.conf" 
+firewall_quiet="YES" 
+firewall_logging_enable="YES" 
+--------------------------------- 
+vi /etc/syslog.conf  添加以下内容 
+
+!ipfw 
+*.*                 /var/log/ipfw.log 
+--------------------------------- 
+vi /etc/ipfw.conf 添加以下内容 
+add 00001 allow ip from any to any
+
+
+12启动脚本
+vi /etc/rc.local
+--------------------------------- 
+#/etc/qmail/start
+#/etc/qmail/start
+#/etc/qmail/start
+#/etc/qmail/start
+#/etc/local/apache/bin/apachectl start
+#/etc/local/mysql/bin/safe_mysqld --user=root &
+sh /etc/rc.d/foo.sh
+--------------------------------- 
+
+vi /etc/rc.d/foo.sh
+---------------------------------
+echo Hello World
+cd /usr/local/apache/bin
+./apachectl start
+cd /usr/local/mysql/bin
+./safe_mysqld --user=mysql &
+
+--------------------------------- 
+
+
+13更改VBB2.3.0模板
+cp /admin/vbulletin.style /admin/vbulletin-1.style
+vi /admin/vbulletin-1.style
+http://x.x.x.x/admin/index.php
+后台>>>模板风格>>>下载/上传>>>引入已经存在的风格套系文件: (从服务器的本地文件)>>>>> 
+选择vbulletin-1.style>>>>点“引入文件” 
+
+
+14其他命令：
+# dmesg | grep ^CPU
+
+
+
+
+
+
+
+
+【16】配置apache的虚拟主机
+#
+# Use name-based virtual hosting.
+#
+NameVirtualHost *:80
+
+#
+# VirtualHost example:
+# Almost any Apache directive may go into a VirtualHost container.
+# The first VirtualHost section is used for requests without a known
+# server name.
+#
+#<VirtualHost *:80>
+#    ServerAdmin webmaster@dummy-host.example.com
+#    DocumentRoot /www/docs/dummy-host.example.com
+#    ServerName dummy-host.example.com
+#    ErrorLog logs/dummy-host.example.com-error_log
+#    CustomLog logs/dummy-host.example.com-access_log common
+#</VirtualHost>
+
+<VirtualHost *>
+ServerAdmin stanley@apecn.com
+DocumentRoot /usr/home/stanley/webpage
+ServerName www.faxingren.com
+ErrorLog /usr/home/stanley/wwwlogs/fxr/error.log
+CustomLog /usr/home/stanley/wwwlogs/fxr/custom.log common
+</VirtualHost>
+
+<VirtualHost *>
+ServerAdmin stanley@apecn.com
+DocumentRoot /usr/home/stanley/cnmail
+ServerName apecn.cn
+RedirectMatch permanent ^/$ http://apecn.cn/cgi-bin/sqwebmail
+ErrorLog /usr/home/stanley/wwwlogs/apecn.cn/error.log
+CustomLog /usr/home/stanley/wwwlogs/apecn.cn/custom.log common
+</VirtualHost>
+
+
+#<VirtualHost _default_:*>
+#</VirtualHost>
+/usr/local/apache/conf/httpd.conf: 1251 lines, 45184 characters.
+BSD2# cd /usr/local/apache/bin
+BSD2# ./apachectl restart
+./apachectl restart: httpd restarted
+BSD2#
+
+【17】磁盘操作相关：
+du -sk 目录名
+du -sh
+查看文件夹大小；
+df -h 查看磁盘空间
+
+
+18
+unp error:
+mcast_leave.c:26: `IPV6_DROP_MEMBERSHIP' undeclared (first use in this function)
+
+
+You'll need to change the following:
+mcast_leave.c: Change IPV6_DROP_MEMBERSHIP to IPV6_LEAVE_GROUP
+mcast_join.c: Change IPV6_ADD_MEMBERSHIP to IPV6_JOIN_GROUP
+
+
+19 
+ln -s /home/t920/cpp/unpv12e /unp
+IIRC these names were changed by a later RFC (2553, which obsoletes 2133 and is obsoleted by 3493). Matter of fact, I was grousing about this, a while ago, about this very issue: http://forums.devshed.com/t53905/s.html?perpage=15&pagenumber=2
+
+Hope this helps :) 
+
+20
+find / -name httpd.conf  
+
+21
+vi /var/log/lastlog
+
+22
+chmod 777 file && ln -s file /bin/
+
+23
+du -sh
+nl -b a msshell.c
+wc msshell.c
+Free# find / -name wc
+/usr/bin/wc
+
+{sed awk都可以，linux中wc -l}
+
+24
+set(查看所有变量)
+
+25
+chown george scores
+chgrp ftpuser ftproot
+
+26
+mount -t ufs /dev/da1s1 /70gdisk
+
+
+27
+export PATH=${PATH}:~shellprogs
+
+echo $PATH
+
+chmod +x today
+
+iostat
+
+vmstat
+
+sed
+
+grep
+
+du
+
+umask
+
+cron
+
+
+
+
+28   关闭sendmail 587
+/etc/mail/sendmail.cf。查找这一行： 
+O DaemonPortOptions=Port=587, Name=MSA, M=E 
+然后在前面加上 # ，
+
+在/etc/rc.conf中
+sendmail_enable="NONE" 
+这将彻底关闭25端口。检查一下这是否让你无法发送邮件是很重要的
+
+
+29  关闭514端口
+在/etc/rc.conf中
+增加下面的选项: 
+syslogd_enable="YES" 
+syslogd_flags="-ss" 
+标志中的ss (确认用了两个s，而不是一个) 将禁止来自远程主机的记录并关闭端口，但仍然允许 localhost 进行日志记录。
+
+
+
+
+30 安装Vpopmail，多用户域：
+
+
+
+
+31  查询MX记录
+ dig -t mx ttt.org
+
+
+32
+
+找出root所属的带s位的程序: 
+
+----# find / -type f \( -perm -04000 -o -perm -02000 \) -print |less 
+
+----禁止其中不必要的程序: 
+
+----# chmod a-s program_name 
+
+
+
+33 kld (lsmod in linux)
+kldconfig
+kldload
+kldstat
+kldunload
+
+
+34 apache/conf/httpd.conf
+ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 限定CGI执行的目录
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+</Directory>   允许符号连接
+#AddHandler cgi-script .cgi 基于文件名启用CGI（不使用）
+
+
+apache浏览目录问题 
+In httpd.conf,
+change
+Options Indexes FollowSymLinks
+to
+Options -Indexes FollowSymLinks
+Restart httpd 
+
+
+
+35安装源码
+假如你的系统上没有 /usr/src/sys目录，就意味着你没有安装内核原代码。 安装内核源码的最简便的方法是以root身份运行/stand/sysinstall ，选择Configure, ,然后 Distributions ---> src--> sys
+
+
+36获取当前安全级别
+ sysctl kern.securelevel
+(更改Time_wait的超时时间)
+
+37
+
+BSD76# dmesg
+BSD76# truss
+BSD76# mount_nfs
+
+
+
+</html>

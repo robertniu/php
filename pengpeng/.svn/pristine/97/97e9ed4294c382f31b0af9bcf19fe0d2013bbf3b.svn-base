@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="zh-CN">
+<head>
+<title>chenhan-windows</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>
+
+
+
+1
+vi /etc/default/login
+#CONSOLE=/dev/console
+"it makes telnet as root"
+
+
+2
+useradd -u 1234 -g staff -d /stanley -m -s /usr/bin/sh sun
+
+增加了一个用户sun  id 1234 组staff 目录/stanley shell:/usr/bin/sh
+
+passwd sun 更改密码
+
+groupadd -g 1000 sun 增加组
+
+
+3查看进程信息
+ps -ef
+
+
+
+4【T3】
+vol add NewLun3 data u1d1-3 raid 5
+vol init NewLun3 data
+vol mount NewLun3
+vol unmount NewLun3
+vol list
+vol stat
+proc list
+proc kill
+
+
+vxdiskadd c2
+vxdisk list
+
+devfsadm -C
+drvconfig -c disk
+
+
+★vxdctl enable
+★vxdisksetup -i c2t2d1
+★vxdisksetup -i c2t2d0
+★vxdg init SunT3dg1 disk001=c2t2d0 disk002=c2t2d1
+
+vxassist -p -g SunT3-test maxsize layout=nolog disk001   【239755264】
+vxassist -g SunT3-test -U gen make trunk001 2g layout=nolog disk001
+vxedit -g SunT3-test set group=root user=root mode=660 trunk001
+vxassist -g SunT3-test -U fsgen make voltest1 20g layout=nolog disk001
+★vxassist -g SunT3dg1 -U fsgen make voltest2 500g
+vxedit -g SunT3-test set group=root user=root mode=600 voltest1
+★newfs /dev/vx/rdsk/SunT3dg1/voltest2
+mount /dev/vx/dsk/SunT3-test/voltest1 /salary
+★mount /dev/vx/dsk/SunT3dg1/voltest2 /salary
+★umount /salary
+★vxedit -g SunT3dg1 -rf rm voltest2
+★vxedit -g SunT3dg1 -rf rm disk001
+
+newfs -v -m 5 /dev/rdsk/c2t1d0s6
+mount /dev/dsk/c2t1d0s6 /salary
+
+# ps -ef | grep smbd
+# umount /salary
+
+vol add后format不显示任何新的信息
+
+c2t2d0s2     sliced    disk001      SunT3dg1     联机
+c2t2d1s2     sliced    disk002      SunT3dg1     联机
+
+
+
+
+【5】
+gunzip gz文件包
+
+
+
+
+</html>

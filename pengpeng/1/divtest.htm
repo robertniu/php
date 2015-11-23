@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title> New Document </title>
+<meta name="Keywords" content="">
+<meta name="Description" content="">
+<script type="text/javascript" >
+function test(of)
+{
+var a = document.getElementsById(of);
+ if (of == 1)
+ {
+ alert(of);
+a[0].style.border="10px solid blue";
+a[0].style.backgroundColor="red";
+ }
+ if (of == 2)
+ {
+  alert(of);
+a[1].style.border="10px solid blue";
+a[1].style.backgroundColor="red";
+
+ }
+ if (of == 3)
+ {
+  alert(of);
+a[2].style.border="10px solid blue";
+a[2].style.backgroundColor="red";
+ }
+ 
+}
+
+function inputcheck(ids)
+{
+var mark=document.getElementById(ids);
+if(mark.checked=='')
+{
+mark.checked='checked';
+}
+else
+{
+mark.checked='';
+}
+}
+
+</script>
+<style type="text/css">
+body,div{margin:0;padding:0;}
+div{width:100px;height:100px;
+border:1px solid red;
+margin:30px auto;}
+</style>
+</head>
+
+<body>
+<div id=1 onclick="inputcheck('in3')"><input type="checkbox" name="pyn" value ="12" id="in3" ></div>
+<div id=2 onclick="test(2)"></div>
+<div id=3 onclick="test(3)"></div>
+</body>
+</html>
+

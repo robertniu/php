@@ -1,0 +1,34 @@
+<html>
+<head></head>
+<body>
+<?php
+
+$mysql = new SaeMysql();
+//$name = strip_tags( $_REQUEST['pyn'] );
+//$name = strip_tags( $_POST['pyn'] );
+$textall ="";
+$name = $_POST['pyn']; 
+
+foreach ($name  as $k=>$v )
+{
+    if ($k==0) $textall.=$v;
+    else $textall.=",".$v;  
+}
+
+
+echo "You have selected:=".$textall;
+//$age = intval( $_REQUEST['age'] );
+$sql = "INSERT  INTO `users` ( `weiboid` , `weiboname`,`pynames` ) VALUES ( '','','"  . $mysql->escape( $textall ) . "'  ) ";
+//$sql = "INSERT  INTO `users` ( `id` , `weiboid` , `weiboname`,`pynames` ) VALUES ( '','','','$textall '  ) ";
+$mysql->runSql( $sql );
+if( $mysql->errno() != 0 )
+{
+    die( "Error:" . $mysql->errmsg() );
+}
+ 
+$mysql->closeDb();
+
+
+?>
+</body>
+</html>

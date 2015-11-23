@@ -1,0 +1,1582 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="zh-CN">
+<head>
+<title>chenhan-linux</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>
+
+<br>
+既然服务器有问题了，那我们来看看今天有什么文件被修改了：<br>
+find /home/ -ctime 1  <br>
+
+【3】metaexploit
+msfconsole
+show exploits
+info exploit  windows/vnc/ultravnc_client
+show payloads
+info payload windows/x64/vncinject/bind_tcp
+ use windows/x64/vncinject/bind_tcp
+ show options
+
+【1】用Linux系统自带的find命令以eval、shell_exec、passthru等关键词来搜索webshell
+find /app/webapp/ -name "*.php" | xargs grep "eval" | more
+find /app/webapp/ -name "*.php" | xargs grep "shell_exec" | more
+find /app/webapp/ -name "*.php" | xargs grep "passthru" | more
+
+
+【2】medusa 安装
+  140  medusa -d
+  141  cat /etc/ld.so.conf
+  144  ls /etc/ld.so.conf.d/
+  145  echo /usr/local/lib > /etc/ld.so.conf.d/local.conf
+  146  ls /etc/ld.so.conf.d/
+  147  cat /etc/ld.so.conf.d/*
+  148  ls -l /usr/local/lib/libssh*
+  149  ldconfig
+  150  ldd /usr/local/lib/medusa/modules/ssh.mod
+  151  medusa -d
+  169  nmap -sV -p22 -oG ssh 192.168.1.0/24
+  170  ls
+  171  grep 22/open ssh | cut -d " " -f 2 >>ssh1.txt
+  172  cat ssh1.txt
+  176  vi p.txt
+  177  medusa -H ssh1.txt -u root -P p.txt -M ssh
+
+
+marchliu: sqlalchemy.sql.text ，我所用过的最好的 sql 脚本工具，可以方便的管理参数，可以写原生脚本，也可以用orm对象，还可以做简单的语法解析（sqlalchemy的水平分库依赖此能力）
+
+
+22 查找有setuid和setgid的文件
+find / -type f -perm +6000 \-exec ls -lg {} \;
+find / -type f \( -perm -04000 -o -perm -02000 \) \-exec ls -lg {} \;
+
+
+
+21 修改用户PATH
+比如要把/etc/apache/bin目录添加到PATH中
+1.#PATH=$PATH:/etc/apache/bin
+使用这种方法,每当登出PATH就会恢复
+2.#vi /etc/profile
+在适当位置添加PATH=$PATH:/etc/apache/bin
+这种方法最好,除非你强制手动修改PATH的值,否则将不会被改变
+3.#vi ~/.bash_profile
+修改PATH行,把/etc/apache/bin添加进去
+这种方法是针对用户起作用的
+
+
+
+
+20 锁和解锁用户
+vi /etc/pam.d/system-auth
+
+增加 auth        required      pam_tally.so deny=10 unlock_time=100
+
+查看 #faillog -u chenhan 
+解锁 #faillog -u chenhan -r
+
+
+[root@localhost chenhan]# usermod -L chenhan
+[root@localhost chenhan]# passwd -S chenhan
+chenhan LK 2010-04-02 0 99999 7 -1 (Password locked.)
+[root@localhost chenhan]# usermod -U chenhan
+[root@localhost chenhan]# passwd -S chenhan
+chenhan PS 2010-04-02 0 99999 7 -1 (Password set, MD5 crypt.)
+
+
+19
+chmod 4755 /bin/ping
+chmod -s /bin/ping
+chmod 6755 /bin/ping
+
+
+
+
+
+18
+passwd -l root
+passwd -u root
+passwd -S root
+检查shadow中空口令帐号
+
+　　检查方法：
+
+　　#awk -F: "( == "") { print }" /etc/shadow
+
+　　备份方法：cp -p /etc/shadow /etc/shadow_bak
+
+　　加固方法：对空口令账号进行锁定，或要求增加密码
+
+17
+检查syn-recv的条目
+netstat -n -p -t | grep SYN_RECV | grep :80 | wc -l
+
+限制可以ssh的ip段
+#vi /etc/ssh/sshd_config，添加以下语句
+
+　　AllowUsers *@10.138.*.* 此句意为：仅允许10.138.0.0/16网段所有用户通过ssh访问
+
+　　保存后重启ssh服务
+
+16-history
+vi /etc/profile
+HISTSIZE=0
+
+
+15-yum
+yum list
+yum remove wget.i386
+
+0-
+mount -t iso9660 /dev/cdrom /mnt/cdrom
+mount -t iso9660 XXX.iso /mnt/some-dir -o loop
+
+
+1-关闭和改变apahce回显banner的版本号
+vi httpd.conf
+ServerTokens Prod
+ServerSignature Off
+
+vi ./include/ap_release.h
+#define AP_SERVER_BASEVENDOR "SuperNB Software"
+#define AP_SERVER_BASEPROJECT "SuperNB HTTP Server"
+#define AP_SERVER_BASEPRODUCT "SuperNB"
+
+
+2-查看表空间
+mysql> SHOW TABLE STATUS FROM ginf_db like 'ginf_users_01';
+alter   table   tablename   type   innodb;   
+
+
+3-acl-http://www.ibm.com/developerworks/cn/linux/l-acl/index.html
+dd if=/dev/zero of=/opt/testptn count=512
+losetup /dev/loop0 /opt/testptn
+mke2fs /dev/loop0
+mount -o rw,acl /dev/loop0 /mnt
+
+
+
+4-ssh登陆的新用户强制修改密码
+vi sshd_config -> PermitEmptyPasswords yes
+useradd user1
+passwd  pwd1
+chage -d 0 user1
+
+
+
+5-suse9在vmware中的安装
+x11i=fbdev
+
+
+
+
+6
+find / -type f -name ssh -exec ls -ltr {} \;
+
+
+7系统中文字体问题
+[root@tos1 sysconfig]# more i18n
+LANG="en_US.UTF-8"
+SYSFONT="latarcyrheb-sun16"
+
+[root@tos1 sysconfig]# more i18n-org
+LANG="zh_CN.UTF-8"
+LANGUAGE="zh_CN.GB18030:zh_CN.GB2312:zh_CN"
+SUPPORTED="zh_CN.GB18030:zh_CN.GB2312:zh_CN.UTF-8:zh:en_US.UTF-8:en_US:en:ja_JP.UTF-8:ja_JP:ja"
+SYSFONT="lat0-sun16"
+SYSFONTACM="8859-15"
+
+
+[root@localhost etc]# LANG="zh_CN.GB2312"
+
+#正常的en环境/etc/sysconfig/i18n
+LANG="en_US.UTF-8"
+SUPPORTED="en_US.UTF-8:en_US:en"
+SYSFONT="latarcyrheb-sun16"
+
+#
+
+
+7 rootkit
+grep ":x:0:" /etc/passwd
+
+useradd -u0 -o -M username
+
+
+
+8 查看iptables的nat
+cat /proc/net/ip_conntrack
+
+#./bin/bash
+#ip.sh
+IPT=/sbin/iptables
+################################Clear ip rules#####################
+$IPT -F -t filter
+$IPT -X -t filter
+$IPT -Z -t filter
+$IPT -F -t nat
+$IPT -Z -t nat
+$IPT -X -t nat
+################################Default policy#####################
+$IPT -P FORWARD DROP
+$IPT -P INPUT DROP
+$IPT -P OUTPUT DROP
+################################User rules##########################
+$IPT -t filter -A INPUT -s 127.0.0.1 -j ACCEPT
+$IPT -t filter -A INPUT -p tcp --dport 22 -j ACCEPT
+$IPT -t filter -A OUTPUT -p tcp --sport 22 -j ACCEPT
+$IPT -t filter -A INPUT -p icmp --icmp-type 8 -j ACCEPT
+$IPT -t filter -A OUTPUT -p icmp --icmp-type 0 -j ACCEPT
+
+代替以上user rules的另一种方法：
+################################User rules##########################
+$IPT -t filter -A INPUT -p tcp --dport 22 -j ACCEPT
+$IPT -t filter -A OUTPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+
+和squid配合实现透明代理的nat
+
+
+################################User rules##########################
+$IPT -t nat -A POSTROUTING -s 10.98.155.0/25 -o eth0 -j SNAT --to-source 10.98.155.120
+
+$IPT -t nat -A PREROUTING -s 10.98.155.0/25 -i eth0 -p tcp --dport 80 -j REDIRECT --to-ports 3128
+
+
+
+9 timezone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+
+10 crontab不生效问题
+crontab -u root /var/spool/cron/root
+
+
+
+11清lastlogin
+[root@TSC-Squid ~]# cat /dev/null > /var/log/messages
+[root@TSC-Squid ~]# cat /dev/null > /var/log/wtmp
+[root@TSC-Squid ~]# cat /dev/null > /var/log/secure
+[root@TSC-Squid ~]# cat /dev/null > /var/log/lastlog
+
+
+12 kernel栈随机处理
+redhat:
+echo 1 > /proc/sys/kernel/exec-shield-randomize
+other：
+echo 1 > /proc/sys/kernel/randomize_va_space
+
+
+13 top输出到文本
+top -n 1 -b > top.log
+
+
+
+14 suse的firewall
+/sbin/rcSuEfirewall2 restart
+
+
+
+【22】apache的vhost设置
+<IfModule mod_vhost_alias.c>
+     VirtualDocumentRoot /data/web/%0
+     LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" vhost
+     ErrorLog "|/usr/sbin/cronolog /data/weblog/%Y-%m-%d-error_log"
+     CustomLog "|/usr/sbin/cronolog /data/weblog/%Y-%m-%d-access_log" vhost
+</IfModule>
+
+
+
+【21】让apache 支持includes
+vi httpd.conf
+<Directory "/data/web">
+
+    Options Indexes FollowSymLinks
+    Options Includes
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+
+</Directory>
+AddHandler server-parsed .htm
+
+AddType text/html .shtml
+AddOutputFilter INCLUDES .shtml
+
+
+
+
+
+【20】user的shell变量
+cd /home/user
+vi .bashrc
+export   PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin
+
+
+
+【19】apache的DSO安装
+
+cd /data/software/httpd-2.2.8/modules/mappers
+/usr/local/apache2/bin/apxs -i -a -c mod_vhost_alias.c   如成功则不需要下面的步骤
+gcc -shared -o mod_vhost_alias.so mod_vhost_alias.o -Wc,-Wall -L/usr/local/lib -Llib
+cp mod_vhost_alias.so /usr/local/apache/modules/
+/sbin/service httpd restart
+
+
+【18】freetype  gd  php   对已经编译好的php做增加gd-freetype的操作
+
+rpm -e gd-devel-1.8.4-11
+rpm -e gd-1.8.4-11
+rpm -e freetype-2.1.3-6
+
+cd freetype-2.1.10
+./configure
+make
+make install
+
+cd gd-2.0.34
+./configure --with-png --with-freetype-dir=/usr/local/lib --with-jpeg
+make
+make install
+
+cd php-5.2.5
+./configure --prefix=/usr/local/php --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/php --enable-sockets --with-mysql=/usr/local/mysql --with-zlib-dir=/usr/include --with-gd --with-jpeg-dir=/usr/local/jpeg6 --with-libxml-dir=/usr/local/libxml2 --with-freetype-dir=/usr/local/lib --enable-mbstring
+make
+make install
+
+cd ZendOptimizer-3.3.0-linux-glibc21-i386
+./install
+
+/usr/local/apache2/bin/apachectl restart
+
+
+
+【17】源代码安装apache php mysql zend
+binutils-2.13.90.0.18-9.i386.rpm  glibc-devel-2.3.2-11.9.i386.rpm      libpng-devel-1.2.2-16.i386.rpm
+cpp-3.2.2-5.i386.rpm              glibc-kernheaders-2.4-8.10.i386.rpm  mysql-standard-4.1.22-pc-linux-gnu-i686.tar.gz
+flex-2.5.4a-29.i386.rpm           httpd-2.0.59.tar.gz                  php-4.4.7.tar.gz
+gcc-3.2.2-5.i386.rpm              libjpeg-devel-6b-26.i386.rpm         zlib-devel-1.1.4-8.i386.rpm
+
+
+groupadd mysql
+useradd -g mysql mysql
+tar zxvf mysql-standard-4.1.22-pc-linux-gnu-i686.tar.gz
+mv mysql-standard-4.1.22-pc-linux-gnu-i686 /usr/local/mysql
+cd mysql
+scripts/mysql_install_db --user=mysql 
+chown -R root .
+chown -R mysql data
+chgrp -R mysql .
+./bin/mysqld_safe --user=mysql &
+./bin/mysqladmin -u root password mysql
+cp ./support-files/mysql.server /etc/init.d/mysql
+cd /etc/rc3.d/
+ln -s /etc/init.d/mysql S85mysql
+ln -s /etc/init.d/mysql K85mysql
+
+tar zxvf httpd-2.0.59.tar.gz
+cd httpd-2.0.59
+./configure --prefix=/usr/local/apache2 --enable-so
+make && make install
+cp apachectl /etc/init.d/httpd
+cd /etc/rc3.d
+ln -s /etc/init.d/httpd S85httpd
+ln -s /etc/init.d/httpd K85httpd
+service httpd start
+
+
+[root@app77 conf]# ./configure --prefix=/usr/local/apache2 --enable-module=alias --enable-module=vhost_alias --enable-module=so --enable-shared=vhost_alias --enable-shared=max
+
+
+tar zxvf php-4.4.7.tar.gz
+cd php-4.4.7
+./configure --prefix=/usr/local/php --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/php --enable-sockets --with-mysql=/usr/local/mysql --with-zlib-dir=/usr/include --with-gd --with-jpeg-dir=/usr/lib
+
+./configure --prefix=/usr/local/php --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/php --enable-sockets --with-mysql=/usr/local/mysql --with-zlib-dir=/usr/include --with-gd --with-jpeg-dir=/usr/lib --with-xml --with-freetype --enable-memory-limit --enable-mbstring
+
+
+[root@gbbbs php-5.2.5]# ./configure --prefix=/usr/local/php --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/Zend/etc --enable-sockets --with-mysql=/usr/local/mysql --with-zlib-dir=/usr/include --with-gd --with-jpeg-dir=/usr/local/jpeg6 --with-libxml-dir=/usr/local/libxml2 --with-freetype-dir=/usr/local/lib --enable-memory-limit --enable-mbstring
+
+[root@app77 php-5.2.6]# ./configure --prefix=/usr/local/php --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/Zend/etc --enable-sockets --with-mysql --with-zlib --with-gd --with-jpeg --with-libxml-dir=/usr/include/libxml2 --with-freetype --enable-memory-limit --enable-mbstring
+
+
+make && make install
+cp php.ini-dist /usr/local/php/php.ini
+vi /usr/local/apache2/conf/httpd.conf
+                   AddType application/x-tar .tgz
+                   AddType application/x-httpd-php .php
+                   AddType image/x-icon .ico 
+service httpd restart
+
+chcon -t texrel_shlib_t libphp5.so
+
+
+【16】openssh
+修改配置文件 vi /etc/ssh/sshd_config
+
+Port 2244
+Protocol 2
+PermitRootLogin no
+RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile      .ssh/authorized_keys
+PasswordAuthentication no
+X11Forwarding no
+#just for high version
+UseDNS no
+
+生成rsa密钥对：
+ssh-keygen -t rsa
+#使用puttygen生成会出现问题，在putty客户端使用puttygen转化一下由ssh-keygen生成的私钥才能使用。
+
+cd /root
+mkdir .ssh
+chmod 700 .ssh
+cd .ssh
+cat id_rsa.pub > authorized_keys
+chmod 600 authorized_keys
+
+
+
+升级openssh：
+tar zxvf openssl-0.9.8e.tar.gz
+cd openssl-0.9.8e
+ ./config shared zlib
+make
+make install
+ mv /usr/bin/openssl /usr/bin/openssl.OFF
+mv /usr/include/openssl /usr/include/openssl.OFF
+ln -s /usr/local/ssl/bin/openssl /usr/bin/openssl
+ln -s /usr/local/ssl/include/openssl /usr/include/openssl
+
+echo "/usr/local/ssl/lib" >> /etc/ld.so.conf
+ ldconfig -v
+openssl version -a 显示已经更新了openssl
+
+
+
+tar zxvf openssh-4.6p1.tar.gz
+cd openssh-4.6p1
+ ./configure --prefix=/usr/local/openssh4.6 --with-zlib --with-ssl-dir=/usr/local/ssl --with-md5-passwords
+#加入--with-pam 选项后configure报错：PAM headers not found 有待解决；据说安装pam-devel-0.75-48.i386.rpm后可以解决，未验证；
+make 
+make install
+
+
+vi /usr/local/openssh46/etc/sshd_config
+service sshd stop
+/usr/local/openssh46/sbin/sshd
+
+vi /etc/rc.local
+service sshd stop
+/usr/local/openssh4.6/sbin/sshd
+
+
+
+【15】crontab
+crontab -l
+crontab -e
+*/5 * * * *  echo "1" >> /home/test/testcron.log  每五分钟执行一次
+0 0 * * * /data/bakdata.sh   每天零点执行一次
+
+基本格式 :
+*　　*　　*　　*　　*　　command
+分　时　日　月　周　命令
+
+第1列表示分钟1～59 每分钟用*或者 */1表示
+第2列表示小时1～23（0表示0点）
+第3列表示日期1～31
+第4列表示月份1～12
+第5列标识号星期0～6（0表示星期天）
+第6列要运行的命令
+
+crontab文件的一些例子：
+
+30 21 * * * /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示每晚的21:30重启apache。
+
+45 4 1,10,22 * * /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示每月1、10、22日的4 : 45重启apache。
+
+10 1 * * 6,0 /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示每周六、周日的1 : 10重启apache。
+
+0,30 18-23 * * * /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示在每天18 : 00至23 : 00之间每隔30分钟重启apache。
+
+0 23 * * 6 /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示每星期六的11 : 00 pm重启apache。
+
+* */1 * * * /usr/local/etc/rc.d/lighttpd restart
+每一小时重启apache
+
+* 23-7/1 * * * /usr/local/etc/rc.d/lighttpd restart
+晚上11点到早上7点之间，每隔一小时重启apache
+
+0 11 4 * mon-wed /usr/local/etc/rc.d/lighttpd restart
+每月的4号与每周一到周三的11点重启apache
+
+0 4 1 jan * /usr/local/etc/rc.d/lighttpd restart
+一月一号的4点重启apache
+
+
+
+【14】 MRTG的安装和配置
+
+rpm -ivh net-snmp-5.0.6-17.i386.rpm
+rpm -ivh net-snmp-utils-5.0.6-17.i386.rpm
+vi /etc/snmp/snmpd.conf
+snmpwalk -v 1 localhost -c public system
+
+
+rpm -ivh gd-devel-1.8.4-11.i386.rpm
+rpm -ivh zlib-devel-1.1.4-8.i386.rpm
+rpm -ivh libpng-devel-1.2.2-16.i386.rpm
+
+
+tar zxvf mrtg-2.15.2.tar.gz
+
+ ./configure --prefix=/usr/local/mrtg-2 \
+ --with-gd=/usr/include \
+ --with-gd-lib=/usr/lib \
+ --with-gd-inc=/usr/include \
+ --with-png=/usr/include \
+ --with-zlib=/usr/include
+
+make
+make install
+
+
+mkdir /usr/web/bbs.hitfm.cn/mrtg
+mkdir /usr/web/bbs.hitfm.cn/mrtg/net
+
+cp /usr/software/mrtg-2.15.2/images/* /usr/web/bbs.hitfm.cn/mrtg/net
+cd /usr/local/mrtg-2/bin
+./cfgmaker --output=/usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg public@192.168.108.103
+
+vi mrtg.cfg
+ WorkDir: /usr/web/bbs.hitfm.cn/mrtg/net
+ Options[_]: growright, bits
+ Language: gb2312
+ EnableIPv6: no
+
+Target[eth0bps]: 2:public@192.168.108.103
+MaxBytes[eth0bps]: 12500000
+Title[eth0bps]: eth0
+PageTop[eth0bps]: <H1>Eth0 bps on bbs.hitfm.cn</H1>
+
+
+Target[netstat]: `/usr/web/bbs.hitfm.cn/mrtg/netstat.sh`
+Options[netstat]: gauge,nopercent,growright
+YLegend[netstat]: netstat conn
+LegendI[netstat]: netstat totals
+LegendO[netstat]: netstat current
+MaxBytes[netstat]: 4000
+Title[netstat]: netstat
+PageTop[netstat]: <H1>Netstat on bbs.hitfm.cn</H1>
+
+
+
+Target[cpu]: `/usr/web/bbs.hitfm.cn/mrtg/cpu.sh`
+Options[cpu]: gauge,nopercent,growright
+YLegend[cpu]: cpu status
+LegendI[cpu]: cpu1
+LegendO[cpu]: cpu2
+MaxBytes[cpu]: 100
+Title[cpu]: cpu
+PageTop[cpu]: <H1>CPU status on bbs.hitfm.cn</H1>
+
+
+
+Target[weblog]: `/data/web/bbs.hitfm.cn/mrtg/weblog.sh`
+Options[weblog]: gauge,nopercent,growright
+YLegend[weblog]: weblog
+LegendI[weblog]: error
+LegendO[weblog]: access
+MaxBytes[weblog]: 10000
+Title[weblog]: weblog
+PageTop[weblog]: <H1>WEBLOG on bbs.hitfm.cn</H1>
+
+
+vi /usr/web/bbs.hitfm.cn/mrtg/netstat.sh
+#!/bin/bash
+cpuusr=`netstat -an | wc -l  | awk '{print $1}'`
+cpusys=`netstat -an | grep ESTABLISHED | wc -l | awk '{print $1}'`
+UPtime=`/usr/bin/uptime |awk '{print $3""$4""$5}'`
+echo $cpuusr
+echo $cpusys
+echo $UPtime
+hostname
+
+
+vi /usr/web/bbs.hitfm.cn/mrtg/cpu.sh
+#!/bin/bash
+cpuusr=`top -n 1 | sed -n '3p' | awk '{print $3}' | sed -e 's/.$//'`
+cpusys=`top -n 1 | sed -n '3p' | awk '{print $3}' | sed -e 's/.$//'`
+UPtime=`/usr/bin/uptime |awk '{print $3""$4""$5}'`
+echo $cpuusr
+echo $cpusys
+echo $UPtime
+hostname
+
+vi /data/web/bbs.hitfm.cn/mrtg/weblog.sh
+#!/bin/sh
+file=`date +%Y-%m-%d`
+errlines=`wc -l /data/weblog/$file-error_log | awk '{print $1}'`
+errbaselines=`more /data/web/bbs.hitfm.cn/mrtg/errcount.inc`
+errin5m=`expr $errlines - $errbaselines`
+echo "$errlines" > /data/web/bbs.hitfm.cn/mrtg/errcount.inc
+
+acclines=`wc -l /data/weblog/$file-access_log | awk '{print $1}'`
+accbaselines=`more /data/web/bbs.hitfm.cn/mrtg/acccount.inc`
+accin5m=`expr $acclines - $accbaselines`
+echo "$acclines" > /data/web/bbs.hitfm.cn/mrtg/acccount.inc
+
+UPtime=`/usr/bin/uptime |awk '{print $3""$4""$5}'`
+
+echo "$errin5m"
+echo "$accin5m"
+echo "$UPtime"
+hostname
+
+
+env LANG=C ./mrtg /usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg
+env LANG=C /usr/local/mrtg-2/bin/mrtg /data/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg
+
+/usr/local/mrtg-2/bin/indexmaker --output=/usr/web/bbs.hitfm.cn/mrtg/net/index.html --title=VM-linux2 /usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg
+/usr/local/mrtg-2/bin/indexmaker --output=/data/web/bbs.hitfm.cn/mrtg/net/index.html --title=bbs.hitfm.cn /data/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg
+
+./mrtg /usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg > /dev/null 2>&1
+or
+env LANG=C /usr/local/mrtg-2/bin/mrtg /usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg --logging /var/log/mrtg.log
+
+【13】phpmyadmin的配置文件
+<?php
+
+$i=0;
+$i++;
+$cfg['Servers'][$i]['auth_type'] = 'cookie';
+$cfg['blowfish_secret'] = 'leosn';
+$cfg['Servers'][$i]['user']          = 'root';
+$cfg['Servers'][$i]['password']      = '123'; // use here your password
+
+?>
+
+
+
+【12】proftpd的安装(mysql为RPM安装方式，版本4.1.22)
+tar zxvf proftpd-1.2.10.tar.gz
+tar zxvf mysql-standard-4.1.22-pc-linux-gnu-i686-glibc23.tar.gz
+mkdir /usr/local/mysql
+mv mysql-standard-4.1.22-pc-linux-gnu-i686-glibc23/lib /usr/local/mysql
+mv mysql-standard-4.1.22-pc-linux-gnu-i686-glibc23/include /usr/local/mysql
+cp /usr/local/mysql/lib/* /usr/lib
+
+./configure \
+--prefix=/usr/local/proftpd \
+--with-modules=mod_sql:mod_sql_mysql:mod_quotatab:mod_quotatab_sql:mod_ratio \
+--with-includes=/usr/local/mysql/include \
+--with-libraries=/usr/lib
+
+make
+make install
+
+
+创建Proftpd启动脚本
+cp contrib/dist/rpm/proftpd.init.d /etc/rc.d/init.d/proftpd
+vi /etc/rc.d/init.d/proftpd
+找到PATH="$PATH:/usr/local/sbin"这一句
+将它改成PATH="$PATH:/usr/local/proftpd/sbin"
+chmod 755 /etc/rc.d/init.d/proftpd 
+
+groupadd -g 5500 ftpgroup
+adduser -u 5500 -s /bin/false -d /bin/null -c "proftpd user" -g ftpgroup ftpuser
+
+
+磁盘限额部分：
+create database ftpdb; 
+GRANT ALL PRIVILEGES ON ftpdb.* to proftpd@localhost identified by '123'; 
+
+use ftpdb;
+
+CREATE TABLE `ftpgroup` (
+`groupname` varchar(16) NOT NULL default '',
+`gid` smallint(6) NOT NULL default '5500',
+`members` varchar(16) NOT NULL default '',
+KEY `groupname` (`groupname`)
+) TYPE=MyISAM COMMENT='ProFTP group table';
+
+INSERT INTO `ftpgroup` VALUES ('ftpgroup', 5500, 'ftpuser');
+
+CREATE TABLE `ftpquotalimits` (
+`name` varchar(30) default NULL,
+`quota_type` enum('user','group','class','all') NOT NULL default 'user',
+`per_session` enum('false','true') NOT NULL default 'false',
+`limit_type` enum('soft','hard') NOT NULL default 'soft',
+`bytes_in_avail` float NOT NULL default '0',
+`bytes_out_avail` float NOT NULL default '0',
+`bytes_xfer_avail` float NOT NULL default '0',
+`files_in_avail` int(10) unsigned NOT NULL default '0',
+`files_out_avail` int(10) unsigned NOT NULL default '0',
+`files_xfer_avail` int(10) unsigned NOT NULL default '0'
+) TYPE=MyISAM;
+
+CREATE TABLE `ftpquotatallies` (
+`name` varchar(30) NOT NULL default '',
+`quota_type` enum('user','group','class','all') NOT NULL default 'user',
+`bytes_in_used` float NOT NULL default '0',
+`bytes_out_used` float NOT NULL default '0',
+`bytes_xfer_used` float NOT NULL default '0',
+`files_in_used` int(10) unsigned NOT NULL default '0',
+`files_out_used` int(10) unsigned NOT NULL default '0',
+`files_xfer_used` int(10) unsigned NOT NULL default '0'
+) TYPE=MyISAM;
+
+CREATE TABLE `ftpuser` (
+`id` int(10) unsigned NOT NULL auto_increment,
+`userid` varchar(32) NOT NULL default '',
+`passwd` varchar(32) NOT NULL default '',
+`uid` smallint(6) NOT NULL default '5500',
+`gid` smallint(6) NOT NULL default '5500',
+`homedir` varchar(255) NOT NULL default '',
+`shell` varchar(16) NOT NULL default '/sbin/nologin',
+`count` int(11) NOT NULL default '0',
+`host` varchar(30) NOT NULL default '000-000-000-000',
+`lastlogin` datetime NOT NULL default '0000-00-00 00:00:00',
+PRIMARY KEY (`id`)
+) TYPE=MyISAM COMMENT='ProFTP user table';
+
+
+配置文件部分：
+vi /usr/local/proftpd/etc/proftpd.conf
+
+ServerName      "ProFTPD Default Installation"
+ServerType      standalone
+ServerAdmin                     [email]myunix@hotmail.com[/email]
+DefaultServer      on
+Port        21
+Umask        022
+MaxInstances      30
+MaxLoginAttempts                5
+ User        nobody
+ Group        nobody
+
+ AllowOverwrite on
+
+MaxClients      100
+DisplayLogin      welcome.msg
+DisplayFirstChdir    .message
+DisplayConnect /usr/local/proftpd/etc/connect.msg
+DisplayGoAway /usr/local/proftpd/etc/goway.msg
+DisplayQuit /usr/local/proftpd/etc/quit.msg
+MaxHostsPerUser 1
+MaxClientsPerUser 2
+MaxClientsPerHost 1
+
+RootLogin off
+RequireValidShell off
+UseReverseDNS     off
+IdentLookups      off
+TimeoutStalled    600
+TimeoutLogin      900
+TimeoutIdle       600
+TimeoutNoTransfer 600
+AllowForeignAddress on
+PassivePorts 49152 65534
+
+AllowStoreRestart      on
+AllowRetrieveRestart   on
+
+ServerIdent off
+DefaultRoot ~ ftpgroup
+
+SQLAuthTypes Backend Plaintext
+SQLAuthenticate users* groups*
+SQLConnectInfo ftpdb@localhost proftpd 123
+SQLUserInfo ftpuser userid passwd uid gid homedir shell
+SQLGroupInfo ftpgroup groupname gid members
+SQLHomedirOnDemand on
+SQLNegativeCache   on
+SQLLogFile /var/log/proftpd.sql.log
+SQLNamedQuery getcount SELECT "count from ftpuser where userid='%u'"
+SQLNamedQuery getlastlogin SELECT "lastlogin from ftpuser where userid='%u'"
+SQLNamedQuery updatelogininfo UPDATE "count=count+1,host='%h',lastlogin=current_timestamp() WHERE userid='%u'" ftpuser
+SQLShowInfo PASS "230" "You've logged on %{getcount} times, last login at %{getlastlogin}"
+SQLLog PASS updatelogininfo
+
+QuotaEngine on
+QuotaDirectoryTally on
+QuotaDisplayUnits Mb
+QuotaShowQuotas on
+QuotaLog "/var/log/proftpd.quota.log"
+SQLNamedQuery get-quota-limit SELECT "name, quota_type, per_session, limit_type, bytes_in_avail, \
+bytes_out_avail, bytes_xfer_avail, files_in_avail, files_out_avail, files_xfer_avail FROM ftpquotalimits \
+WHERE name = '%{0}' AND quota_type = '%{1}'"
+SQLNamedQuery get-quota-tally SELECT "name, quota_type, bytes_in_used, bytes_out_used, \
+bytes_xfer_used, files_in_used, files_out_used, files_xfer_used FROM ftpquotatallies \
+WHERE name = '%{0}' AND quota_type = '%{1}'"
+SQLNamedQuery update-quota-tally UPDATE "bytes_in_used = bytes_in_used + %{0}, \
+bytes_out_used = bytes_out_used + %{1}, bytes_xfer_used = bytes_xfer_used + %{2}, \
+files_in_used = files_in_used + %{3}, files_out_used = files_out_used + %{4}, \
+files_xfer_used = files_xfer_used + %{5} \
+WHERE name = '%{6}' AND quota_type = '%{7}'" ftpquotatallies
+SQLNamedQuery insert-quota-tally INSERT "%{0}, %{1}, %{2}, %{3}, %{4}, %{5}, %{6}, %{7}" ftpquotatallies
+QuotaLimitTable sql:/get-quota-limit
+QuotaTallyTable sql:/get-quota-tally/update-quota-tally/insert-quota-tally
+SyslogLevel emerg
+SystemLog /var/log/proftpd.system.log
+TransferLog /var/log/proftpd.xferlog
+LogFormat default "%h %l %u %t "%r" %s %b"
+LogFormat auth "%v [%P] %h %t "%r" %s"
+LogFormat write "%h %l %u %t "%r" %s %b"
+ExtendedLog /var/log/proftpd.auth_log AUTH auth
+ExtendedLog /var/log/proftpd.paranoid_log ALL default
+
+
+增加用户和配额：
+insert into ftpuser (id,userid,passwd,uid,gid,homedir,shell) values ('1', 'test','test','5500','5500','/home/test','/sbin/nologin');
+insert into ftpquotalimits (name,quota_type,per_session,limit_type,bytes_in_avail,bytes_out_avail,bytes_xfer_avail,files_in_avail,files_out_avail,files_xfer_avail) values ('test', 'user', 'false', 'soft', '102400000', '0','0','0','0','0');
+100M配额给test用户
+
+mysql> insert into ftpuser (id,userid,passwd,uid,gid,homedir,shell) values ('6', 'test2','test2','5500','5500','/home/test2','/sbin/nologin');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into ftpquotalimits (name,quota_type,per_session,limit_type,bytes_in_avail,bytes_out_avail,bytes_xfer_avail,files_in_avail,files_out_avail,files_xfer_avail) values ('test2', 'user', 'false', 'soft', '1024000', '0','0','0','0','0');
+Query OK, 1 row affected (0.00 sec)
+1M的配额给test2用户
+
+
+
+【11】ftp相关
+lcd  e:/temp
+passive
+delete
+rmdir
+mkdir
+put
+get
+bin
+
+
+
+【10】服务操作
+service vsftpd start 开启服务
+
+service iptables stop 关了防火墙。
+
+
+【9】用户操作
+useradd admin -d /home/admin
+passwd admin
+
+
+【8】mount和ipadd
+使用我们自己准备的响应工具包，装载该介质的文件系统，
+mount –t auto /dev/sda1 /mnt/usb 或
+mount -t iso9660 /dev/cdrom /mnt/cdrom
+
+vi /etc/sysconfig/network-scripts/ifcfg-eth0
+vi /etc/sysconfig/network
+/etc/init.d/network restart
+
+7
+Linux 通过 
+ipcalc  -m 192.168.0.259  &>/dev/null  && echo 'This is an IP Address' ||echo 'This is not an IP Addr'
+
+
+
+【0】关于VI
+:n   跳行
+/    查找
+中文乱码问题：LANG="zh_CN.GB2312"
+
+
+
+【1】RPM相关： 安装gcc、查询已经安装过的包、
+
+[root@stanley-linux ctest]# rpm -ivh gcc-3.2-7.i386.rpm --nodeps  不检查依赖性[不推荐]
+ rpm -qa | grep '^g'
+rpm -e gcc-3.2-7.i386.rpm 卸载
+rpm -ql MySQL-server-4.1.22-0 查看安装的文件信息
+
+
+
+2 查看正在运行的可装载内核模块
+lsmod
+
+
+3 rt9
+ /etc/rc.d/init.d/xinetd restart
+ /etc/rc.d/init.d/vsftpd restart   (在rt9中vsftpd不需要用xinetd来启动)
+
+
+4
+ find / -name 'libnet*' -print
+
+5
+/etc/xinetd.d/vsftpd
+# default: off
+# description: The vsftpd FTP server serves FTP connections. It uses \
+#       normal, unencrypted usernames and passwords for authentication.
+service ftp
+{
+        disable = no
+        socket_type             = stream
+        wait                    = no
+        user                    = root
+        server                  = /usr/sbin/vsftpd      //(/bin/bash)
+        nice                    = 10
+}
+
+
+
+6 管道文件
+
+[root@linux236 root]# mknod mypipe p 
+　　[root@linux236 root]# ls -l mypipe 
+　　prw-r--r-- 1 root root 0 Aug 5 23:27 mypipe 
+　　[root@linux236 root]# 
+
+　　在这里，我们建立了一个叫mypipe的管道文件，用ls -l 命令可以看到它的属性是prw-r--r--，用下面的组合命令实现镜像和压缩： 
+
+　　[root@linux236 root]# compress < mypipe > sda6.img.Z & 
+　　[root@linux236 root]# dd if=/dev/sda6 of=mypipe 
+　　[root@linux236 root]# ls sda6.img.Z 
+　　sda6.img.Z 
+
+
+
+7 修改ip
+vi /etc/sysconfig/network-scripts/ifcfg-eth0    改ip
+vi /etc/sysconfig/network                       改网关
+vi /etc/resolv.conf                             改DNS
+
+service network restart                         生效
+
+
+
+cp -RF 的问题：
+你执行alias，看看有没有alias cp='cp -i'
+如果有，执行
+unalias cp
+
+然后再执行你的cp -Rf dir1 dir2
+
+
+
+
+
+
+
+#######################
+
+
+
+【17】源代码安装apache php mysql zend
+binutils-2.13.90.0.18-9.i386.rpm  glibc-devel-2.3.2-11.9.i386.rpm      libpng-devel-1.2.2-16.i386.rpm
+cpp-3.2.2-5.i386.rpm              glibc-kernheaders-2.4-8.10.i386.rpm  mysql-standard-4.1.22-pc-linux-gnu-i686.tar.gz
+flex-2.5.4a-29.i386.rpm           httpd-2.0.59.tar.gz                  php-4.4.7.tar.gz
+gcc-3.2.2-5.i386.rpm              libjpeg-devel-6b-26.i386.rpm         zlib-devel-1.1.4-8.i386.rpm
+
+
+groupadd mysql
+useradd -g mysql mysql
+tar zxvf mysql-standard-4.1.22-pc-linux-gnu-i686.tar.gz
+mv mysql-standard-4.1.22-pc-linux-gnu-i686 /usr/local/mysql
+cd mysql
+scripts/mysql_install_db --user=mysql 
+chown -R root .
+chown -R mysql data
+chgrp -R mysql .
+./bin/mysqld_safe --user=mysql &
+./bin/mysqladmin -u root password mysql
+cp ./support-files/mysql.server /etc/init.d/mysql
+cd /etc/rc3.d/
+ln -s /etc/init.d/mysql S85mysql
+ln -s /etc/init.d/mysql K85mysql
+
+tar zxvf httpd-2.0.59.tar.gz
+cd httpd-2.0.59
+./configure --prefix=/usr/local/apache2 --enable-so
+make && make install
+cp apachectl /etc/init.d/httpd
+cd /etc/rc3.d
+ln -s /etc/init.d/httpd S85httpd
+ln -s /etc/init.d/httpd K85httpd
+service httpd start
+
+
+tar zxvf php-4.4.7.tar.gz
+cd php-4.4.7
+./configure --prefix=/usr/local/php --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/php --enable-sockets --with-mysql=/usr/local/mysql --with-zlib-dir=/usr/include --with-gd --with-jpeg-dir=/usr/lib
+
+./configure --prefix=/usr/local/php --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/php --enable-sockets --with-mysql=/usr/local/mysql --with-zlib-dir=/usr/include --with-gd --with-jpeg-dir=/usr/lib --with-xml --with-freetype --enable-memory-limit --enable-mbstring
+
+
+[root@gbbbs php-5.2.5]# ./configure --prefix=/usr/local/php --with-apxs2=/usr/local/apache/bin/apxs --with-config-file-path=/usr/local/Zend/etc --enable-sockets --with-mysql=/usr/local/mysql --with-zlib-dir=/usr/include --with-gd --with-jpeg-dir=/usr/local/jpeg6 --with-libxml-dir=/usr/local/libxml2 --with-freetype --enable-memory-limit --enable-mbstring
+
+
+
+make && make install
+cp php.ini-dist /usr/local/php/php.ini
+vi /usr/local/apache2/conf/httpd.conf
+                   AddType application/x-tar .tgz
+                   AddType application/x-httpd-php .php
+                   AddType image/x-icon .ico 
+service httpd restart
+
+
+
+
+【16】openssh
+修改配置文件 vi /etc/ssh/sshd_config
+
+Port 2244
+Protocol 2
+PermitRootLogin no
+RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile      .ssh/authorized_keys
+PasswordAuthentication no
+X11Forwarding no
+#just for high version
+UseDNS no
+
+生成rsa密钥对：
+ssh-keygen -t rsa
+#使用puttygen生成会出现问题，在putty客户端使用puttygen转化一下由ssh-keygen生成的私钥才能使用。
+
+cd /root
+mkdir .ssh
+chmod 700 .ssh
+cd .ssh
+cat id_rsa.pub > authorized_keys
+chmod 600 authorized_keys
+
+
+
+升级openssh：
+tar zxvf openssl-0.9.8e.tar.gz
+cd openssl-0.9.8e
+ ./config shared zlib
+make
+make install
+ mv /usr/bin/openssl /usr/bin/openssl.OFF
+mv /usr/include/openssl /usr/include/openssl.OFF
+ln -s /usr/local/ssl/bin/openssl /usr/bin/openssl
+ln -s /usr/local/ssl/include/openssl /usr/include/openssl
+
+echo "/usr/local/ssl/lib" >> /etc/ld.so.conf
+ ldconfig -v
+openssl version -a 显示已经更新了openssl
+
+
+
+tar zxvf openssh-4.6p1.tar.gz
+cd openssh-4.6p1
+ ./configure --prefix=/usr/local/openssh4.6 --with-zlib --with-ssl-dir=/usr/local/ssl --with-md5-passwords
+#加入--with-pam 选项后configure报错：PAM headers not found 有待解决；据说安装pam-devel-0.75-48.i386.rpm后可以解决，未验证；
+make 
+make install
+
+
+vi /usr/local/openssh46/etc/sshd_config
+service sshd stop
+/usr/local/openssh46/sbin/sshd
+
+vi /etc/rc.local
+service sshd stop
+/usr/local/openssh4.6/sbin/sshd
+
+
+
+【15】crontab
+crontab -l
+crontab -e
+*/5 * * * *  echo "1" >> /home/test/testcron.log  每五分钟执行一次
+0 0 * * * /data/bakdata.sh   每天零点执行一次
+
+基本格式 :
+*　　*　　*　　*　　*　　command
+分　时　日　月　周　命令
+
+第1列表示分钟1～59 每分钟用*或者 */1表示
+第2列表示小时1～23（0表示0点）
+第3列表示日期1～31
+第4列表示月份1～12
+第5列标识号星期0～6（0表示星期天）
+第6列要运行的命令
+
+crontab文件的一些例子：
+
+30 21 * * * /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示每晚的21:30重启apache。
+
+45 4 1,10,22 * * /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示每月1、10、22日的4 : 45重启apache。
+
+10 1 * * 6,0 /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示每周六、周日的1 : 10重启apache。
+
+0,30 18-23 * * * /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示在每天18 : 00至23 : 00之间每隔30分钟重启apache。
+
+0 23 * * 6 /usr/local/etc/rc.d/lighttpd restart
+上面的例子表示每星期六的11 : 00 pm重启apache。
+
+* */1 * * * /usr/local/etc/rc.d/lighttpd restart
+每一小时重启apache
+
+* 23-7/1 * * * /usr/local/etc/rc.d/lighttpd restart
+晚上11点到早上7点之间，每隔一小时重启apache
+
+0 11 4 * mon-wed /usr/local/etc/rc.d/lighttpd restart
+每月的4号与每周一到周三的11点重启apache
+
+0 4 1 jan * /usr/local/etc/rc.d/lighttpd restart
+一月一号的4点重启apache
+
+
+
+【14】 MRTG的安装和配置
+
+rpm -ivh net-snmp-5.0.6-17.i386.rpm
+rpm -ivh net-snmp-utils-5.0.6-17.i386.rpm
+vi /etc/snmp/snmpd.conf
+snmpwalk -v 1 localhost -c public system
+
+
+rpm -ivh gd-devel-1.8.4-11.i386.rpm
+rpm -ivh zlib-devel-1.1.4-8.i386.rpm
+rpm -ivh libpng-devel-1.2.2-16.i386.rpm
+
+
+tar zxvf mrtg-2.15.2.tar.gz
+
+ ./configure --prefix=/usr/local/mrtg-2 \
+ --with-gd=/usr/include \
+ --with-gd-lib=/usr/lib \
+ --with-gd-inc=/usr/include \
+ --with-png=/usr/include \
+ --with-zlib=/usr/include
+
+make
+make install
+
+
+mkdir /usr/web/bbs.hitfm.cn/mrtg
+mkdir /usr/web/bbs.hitfm.cn/mrtg/net
+
+cp /usr/software/mrtg-2.15.2/images/* /usr/web/bbs.hitfm.cn/mrtg/net
+cd /usr/local/mrtg-2/bin
+./cfgmaker --output=/usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg public@192.168.108.103
+
+vi mrtg.cfg
+ WorkDir: /usr/web/bbs.hitfm.cn/mrtg/net
+ Options[_]: growright, bits
+ Language: gb2312
+ EnableIPv6: no
+
+Target[eth0bps]: 2:public@192.168.108.103
+MaxBytes[eth0bps]: 12500000
+Title[eth0bps]: eth0
+PageTop[eth0bps]: <H1>Eth0 bps on bbs.hitfm.cn</H1>
+
+
+Target[netstat]: `/usr/web/bbs.hitfm.cn/mrtg/netstat.sh`
+Options[netstat]: gauge,nopercent,growright
+YLegend[netstat]: netstat conn
+LegendI[netstat]: netstat totals
+LegendO[netstat]: netstat current
+MaxBytes[netstat]: 4000
+Title[netstat]: netstat
+PageTop[netstat]: <H1>Netstat on bbs.hitfm.cn</H1>
+
+
+
+Target[cpu]: `/usr/web/bbs.hitfm.cn/mrtg/cpu.sh`
+Options[cpu]: gauge,nopercent,growright
+YLegend[cpu]: cpu status
+LegendI[cpu]: cpu1
+LegendO[cpu]: cpu2
+MaxBytes[cpu]: 100
+Title[cpu]: cpu
+PageTop[cpu]: <H1>CPU status on bbs.hitfm.cn</H1>
+
+
+
+Target[weblog]: `/data/web/bbs.hitfm.cn/mrtg/weblog.sh`
+Options[weblog]: gauge,nopercent,growright
+YLegend[weblog]: weblog
+LegendI[weblog]: error
+LegendO[weblog]: access
+MaxBytes[weblog]: 10000
+Title[weblog]: weblog
+PageTop[weblog]: <H1>WEBLOG on bbs.hitfm.cn</H1>
+
+
+vi /usr/web/bbs.hitfm.cn/mrtg/netstat.sh
+#!/bin/bash
+cpuusr=`netstat -an | wc -l  | awk '{print $1}'`
+cpusys=`netstat -an | grep ESTABLISHED | wc -l | awk '{print $1}'`
+UPtime=`/usr/bin/uptime |awk '{print $3""$4""$5}'`
+echo $cpuusr
+echo $cpusys
+echo $UPtime
+hostname
+
+
+vi /usr/web/bbs.hitfm.cn/mrtg/cpu.sh
+#!/bin/bash
+cpuusr=`top -n 1 | sed -n '3p' | awk '{print $3}' | sed -e 's/.$//'`
+cpusys=`top -n 1 | sed -n '3p' | awk '{print $3}' | sed -e 's/.$//'`
+UPtime=`/usr/bin/uptime |awk '{print $3""$4""$5}'`
+echo $cpuusr
+echo $cpusys
+echo $UPtime
+hostname
+
+vi /data/web/bbs.hitfm.cn/mrtg/weblog.sh
+#!/bin/sh
+file=`date +%Y-%m-%d`
+errlines=`wc -l /data/weblog/$file-error_log | awk '{print $1}'`
+errbaselines=`more /data/web/bbs.hitfm.cn/mrtg/errcount.inc`
+errin5m=`expr $errlines - $errbaselines`
+echo "$errlines" > /data/web/bbs.hitfm.cn/mrtg/errcount.inc
+
+acclines=`wc -l /data/weblog/$file-access_log | awk '{print $1}'`
+accbaselines=`more /data/web/bbs.hitfm.cn/mrtg/acccount.inc`
+accin5m=`expr $acclines - $accbaselines`
+echo "$acclines" > /data/web/bbs.hitfm.cn/mrtg/acccount.inc
+
+UPtime=`/usr/bin/uptime |awk '{print $3""$4""$5}'`
+
+echo "$errin5m"
+echo "$accin5m"
+echo "$UPtime"
+hostname
+
+
+env LANG=C ./mrtg /usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg
+env LANG=C /usr/local/mrtg-2/bin/mrtg /data/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg
+
+/usr/local/mrtg-2/bin/indexmaker --output=/usr/web/bbs.hitfm.cn/mrtg/net/index.html --title=VM-linux2 /usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg
+/usr/local/mrtg-2/bin/indexmaker --output=/data/web/bbs.hitfm.cn/mrtg/net/index.html --title=bbs.hitfm.cn /data/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg
+
+./mrtg /usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg > /dev/null 2>&1
+or
+env LANG=C /usr/local/mrtg-2/bin/mrtg /usr/web/bbs.hitfm.cn/mrtg/net/mrtg.cfg --logging /var/log/mrtg.log
+
+【13】phpmyadmin的配置文件
+<?php
+
+$i=0;
+$i++;
+$cfg['Servers'][$i]['auth_type'] = 'cookie';
+$cfg['blowfish_secret'] = 'leosn';
+$cfg['Servers'][$i]['user']          = 'root';
+$cfg['Servers'][$i]['password']      = '123'; // use here your password
+
+?>
+
+
+
+【12】proftpd的安装(mysql为RPM安装方式，版本4.1.22)
+tar zxvf proftpd-1.2.10.tar.gz
+tar zxvf mysql-standard-4.1.22-pc-linux-gnu-i686-glibc23.tar.gz
+mkdir /usr/local/mysql
+mv mysql-standard-4.1.22-pc-linux-gnu-i686-glibc23/lib /usr/local/mysql
+mv mysql-standard-4.1.22-pc-linux-gnu-i686-glibc23/include /usr/local/mysql
+cp /usr/local/mysql/lib/* /usr/lib
+
+./configure \
+--prefix=/usr/local/proftpd \
+--with-modules=mod_sql:mod_sql_mysql:mod_quotatab:mod_quotatab_sql:mod_ratio \
+--with-includes=/usr/local/mysql/include \
+--with-libraries=/usr/lib
+
+make
+make install
+
+
+创建Proftpd启动脚本
+cp contrib/dist/rpm/proftpd.init.d /etc/rc.d/init.d/proftpd
+vi /etc/rc.d/init.d/proftpd
+找到PATH="$PATH:/usr/local/sbin"这一句
+将它改成PATH="$PATH:/usr/local/proftpd/sbin"
+chmod 755 /etc/rc.d/init.d/proftpd 
+
+groupadd -g 5500 ftpgroup
+adduser -u 5500 -s /bin/false -d /bin/null -c "proftpd user" -g ftpgroup ftpuser
+
+
+磁盘限额部分：
+create database ftpdb; 
+GRANT ALL PRIVILEGES ON ftpdb.* to proftpd@localhost identified by '123'; 
+
+use ftpdb;
+
+CREATE TABLE `ftpgroup` (
+`groupname` varchar(16) NOT NULL default '',
+`gid` smallint(6) NOT NULL default '5500',
+`members` varchar(16) NOT NULL default '',
+KEY `groupname` (`groupname`)
+) TYPE=MyISAM COMMENT='ProFTP group table';
+
+INSERT INTO `ftpgroup` VALUES ('ftpgroup', 5500, 'ftpuser');
+
+CREATE TABLE `ftpquotalimits` (
+`name` varchar(30) default NULL,
+`quota_type` enum('user','group','class','all') NOT NULL default 'user',
+`per_session` enum('false','true') NOT NULL default 'false',
+`limit_type` enum('soft','hard') NOT NULL default 'soft',
+`bytes_in_avail` float NOT NULL default '0',
+`bytes_out_avail` float NOT NULL default '0',
+`bytes_xfer_avail` float NOT NULL default '0',
+`files_in_avail` int(10) unsigned NOT NULL default '0',
+`files_out_avail` int(10) unsigned NOT NULL default '0',
+`files_xfer_avail` int(10) unsigned NOT NULL default '0'
+) TYPE=MyISAM;
+
+CREATE TABLE `ftpquotatallies` (
+`name` varchar(30) NOT NULL default '',
+`quota_type` enum('user','group','class','all') NOT NULL default 'user',
+`bytes_in_used` float NOT NULL default '0',
+`bytes_out_used` float NOT NULL default '0',
+`bytes_xfer_used` float NOT NULL default '0',
+`files_in_used` int(10) unsigned NOT NULL default '0',
+`files_out_used` int(10) unsigned NOT NULL default '0',
+`files_xfer_used` int(10) unsigned NOT NULL default '0'
+) TYPE=MyISAM;
+
+CREATE TABLE `ftpuser` (
+`id` int(10) unsigned NOT NULL auto_increment,
+`userid` varchar(32) NOT NULL default '',
+`passwd` varchar(32) NOT NULL default '',
+`uid` smallint(6) NOT NULL default '5500',
+`gid` smallint(6) NOT NULL default '5500',
+`homedir` varchar(255) NOT NULL default '',
+`shell` varchar(16) NOT NULL default '/sbin/nologin',
+`count` int(11) NOT NULL default '0',
+`host` varchar(30) NOT NULL default '000-000-000-000',
+`lastlogin` datetime NOT NULL default '0000-00-00 00:00:00',
+PRIMARY KEY (`id`)
+) TYPE=MyISAM COMMENT='ProFTP user table';
+
+
+配置文件部分：
+vi /usr/local/proftpd/etc/proftpd.conf
+
+ServerName      "ProFTPD Default Installation"
+ServerType      standalone
+ServerAdmin                     [email]myunix@hotmail.com[/email]
+DefaultServer      on
+Port        21
+Umask        022
+MaxInstances      30
+MaxLoginAttempts                5
+ User        nobody
+ Group        nobody
+
+ AllowOverwrite on
+
+MaxClients      100
+DisplayLogin      welcome.msg
+DisplayFirstChdir    .message
+DisplayConnect /usr/local/proftpd/etc/connect.msg
+DisplayGoAway /usr/local/proftpd/etc/goway.msg
+DisplayQuit /usr/local/proftpd/etc/quit.msg
+MaxHostsPerUser 1
+MaxClientsPerUser 2
+MaxClientsPerHost 1
+
+RootLogin off
+RequireValidShell off
+UseReverseDNS     off
+IdentLookups      off
+TimeoutStalled    600
+TimeoutLogin      900
+TimeoutIdle       600
+TimeoutNoTransfer 600
+AllowForeignAddress on
+PassivePorts 49152 65534
+
+AllowStoreRestart      on
+AllowRetrieveRestart   on
+
+ServerIdent off
+DefaultRoot ~ ftpgroup
+
+SQLAuthTypes Backend Plaintext
+SQLAuthenticate users* groups*
+SQLConnectInfo ftpdb@localhost proftpd 123
+SQLUserInfo ftpuser userid passwd uid gid homedir shell
+SQLGroupInfo ftpgroup groupname gid members
+SQLHomedirOnDemand on
+SQLNegativeCache   on
+SQLLogFile /var/log/proftpd.sql.log
+SQLNamedQuery getcount SELECT "count from ftpuser where userid='%u'"
+SQLNamedQuery getlastlogin SELECT "lastlogin from ftpuser where userid='%u'"
+SQLNamedQuery updatelogininfo UPDATE "count=count+1,host='%h',lastlogin=current_timestamp() WHERE userid='%u'" ftpuser
+SQLShowInfo PASS "230" "You've logged on %{getcount} times, last login at %{getlastlogin}"
+SQLLog PASS updatelogininfo
+
+QuotaEngine on
+QuotaDirectoryTally on
+QuotaDisplayUnits Mb
+QuotaShowQuotas on
+QuotaLog "/var/log/proftpd.quota.log"
+SQLNamedQuery get-quota-limit SELECT "name, quota_type, per_session, limit_type, bytes_in_avail, \
+bytes_out_avail, bytes_xfer_avail, files_in_avail, files_out_avail, files_xfer_avail FROM ftpquotalimits \
+WHERE name = '%{0}' AND quota_type = '%{1}'"
+SQLNamedQuery get-quota-tally SELECT "name, quota_type, bytes_in_used, bytes_out_used, \
+bytes_xfer_used, files_in_used, files_out_used, files_xfer_used FROM ftpquotatallies \
+WHERE name = '%{0}' AND quota_type = '%{1}'"
+SQLNamedQuery update-quota-tally UPDATE "bytes_in_used = bytes_in_used + %{0}, \
+bytes_out_used = bytes_out_used + %{1}, bytes_xfer_used = bytes_xfer_used + %{2}, \
+files_in_used = files_in_used + %{3}, files_out_used = files_out_used + %{4}, \
+files_xfer_used = files_xfer_used + %{5} \
+WHERE name = '%{6}' AND quota_type = '%{7}'" ftpquotatallies
+SQLNamedQuery insert-quota-tally INSERT "%{0}, %{1}, %{2}, %{3}, %{4}, %{5}, %{6}, %{7}" ftpquotatallies
+QuotaLimitTable sql:/get-quota-limit
+QuotaTallyTable sql:/get-quota-tally/update-quota-tally/insert-quota-tally
+SyslogLevel emerg
+SystemLog /var/log/proftpd.system.log
+TransferLog /var/log/proftpd.xferlog
+LogFormat default "%h %l %u %t "%r" %s %b"
+LogFormat auth "%v [%P] %h %t "%r" %s"
+LogFormat write "%h %l %u %t "%r" %s %b"
+ExtendedLog /var/log/proftpd.auth_log AUTH auth
+ExtendedLog /var/log/proftpd.paranoid_log ALL default
+
+
+增加用户和配额：
+insert into ftpuser (id,userid,passwd,uid,gid,homedir,shell) values ('1', 'test','test','5500','5500','/home/test','/sbin/nologin');
+insert into ftpquotalimits (name,quota_type,per_session,limit_type,bytes_in_avail,bytes_out_avail,bytes_xfer_avail,files_in_avail,files_out_avail,files_xfer_avail) values ('test', 'user', 'false', 'soft', '102400000', '0','0','0','0','0');
+100M配额给test用户
+
+mysql> insert into ftpuser (id,userid,passwd,uid,gid,homedir,shell) values ('6', 'test2','test2','5500','5500','/home/test2','/sbin/nologin');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into ftpquotalimits (name,quota_type,per_session,limit_type,bytes_in_avail,bytes_out_avail,bytes_xfer_avail,files_in_avail,files_out_avail,files_xfer_avail) values ('test2', 'user', 'false', 'soft', '1024000', '0','0','0','0','0');
+Query OK, 1 row affected (0.00 sec)
+1M的配额给test2用户
+
+
+
+【11】ftp相关
+lcd  e:/temp
+passive
+delete
+rmdir
+mkdir
+put
+get
+bin
+
+
+
+【10】服务操作
+service vsftpd start 开启服务
+
+service iptables stop 关了防火墙。
+
+
+【9】用户操作
+useradd admin -d /home/admin
+passwd admin
+
+
+【8】mount和ipadd
+使用我们自己准备的响应工具包，装载该介质的文件系统，
+mount –t auto /dev/sda1 /mnt/usb 或
+mount -t iso9660 /dev/cdrom /mnt/cdrom
+
+vi /etc/sysconfig/network-scripts/ifcfg-eth0
+vi /etc/sysconfig/network
+/etc/init.d/network restart
+
+7
+Linux 通过 
+ipcalc  -m 192.168.0.259  &>/dev/null  && echo 'This is an IP Address' ||echo 'This is not an IP Addr'
+
+
+
+【0】关于VI
+:n   跳行
+/    查找
+中文乱码问题：LANG="zh_CN.GB2312"
+
+
+
+【1】RPM相关： 安装gcc、查询已经安装过的包、
+
+[root@stanley-linux ctest]# rpm -ivh gcc-3.2-7.i386.rpm --nodeps  不检查依赖性[不推荐]
+ rpm -qa | grep '^g'
+rpm -e gcc-3.2-7.i386.rpm 卸载
+rpm -ql MySQL-server-4.1.22-0 查看安装的文件信息
+
+
+
+2 查看正在运行的可装载内核模块
+lsmod
+
+
+3 rt9
+ /etc/rc.d/init.d/xinetd restart
+ /etc/rc.d/init.d/vsftpd restart   (在rt9中vsftpd不需要用xinetd来启动)
+
+
+4
+ find / -name 'libnet*' -print
+
+5
+/etc/xinetd.d/vsftpd
+# default: off
+# description: The vsftpd FTP server serves FTP connections. It uses \
+#       normal, unencrypted usernames and passwords for authentication.
+service ftp
+{
+        disable = no
+        socket_type             = stream
+        wait                    = no
+        user                    = root
+        server                  = /usr/sbin/vsftpd      //(/bin/bash)
+        nice                    = 10
+}
+
+
+
+6 管道文件
+
+[root@linux236 root]# mknod mypipe p 
+　　[root@linux236 root]# ls -l mypipe 
+　　prw-r--r-- 1 root root 0 Aug 5 23:27 mypipe 
+　　[root@linux236 root]# 
+
+　　在这里，我们建立了一个叫mypipe的管道文件，用ls -l 命令可以看到它的属性是prw-r--r--，用下面的组合命令实现镜像和压缩： 
+
+　　[root@linux236 root]# compress < mypipe > sda6.img.Z & 
+　　[root@linux236 root]# dd if=/dev/sda6 of=mypipe 
+　　[root@linux236 root]# ls sda6.img.Z 
+　　sda6.img.Z 
+
+
+
+7 修改ip
+vi /etc/sysconfig/network-scripts/ifcfg-eth0    改ip
+vi /etc/sysconfig/network                       改网关
+vi /etc/resolv.conf                             改DNS
+
+service network restart                         生效
+
+
+
+cp -RF 的问题：
+你执行alias，看看有没有alias cp='cp -i'
+如果有，执行
+unalias cp
+
+然后再执行你的cp -Rf dir1 dir2
+
+
+
+</html>
