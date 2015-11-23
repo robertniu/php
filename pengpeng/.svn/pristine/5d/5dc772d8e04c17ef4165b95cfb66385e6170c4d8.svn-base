@@ -1,6 +1,0 @@
-<?php
-//header('Content-Type: text/html; charset=UTF-8');
-define( "WB_AKEY" , '4205486062' ); //新浪萝卜
-define( "WB_SKEY" , 'ee25b891bc1a424451dd28d9ee1be609' );
-define( "WB_CALLBACK_URL" , 'http://pengpeng.sinaapp.com/callback.php' );
-?>
